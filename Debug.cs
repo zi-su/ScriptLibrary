@@ -19,7 +19,7 @@ public class Debug
     [Conditional("UNITY_ASSERTIONS")]
     public static void LogAssertion(object message, Object context)
 	{
-        UnityEngine.Debug.LogAssertion(message, context)
+        UnityEngine.Debug.LogAssertion(message, context);
     }
 
     [Conditional("UNITY_ASSERTIONS")]
@@ -67,7 +67,7 @@ public class Debug
     [Conditional("DEBUG")]
     public static void LogException(System.Exception exception)
 	{
-        UnityEngine.Debug.LogException(exception)
+        UnityEngine.Debug.LogException(exception);
     }
 
     [Conditional("DEBUG")]
@@ -91,7 +91,7 @@ public class Debug
     [Conditional("DEBUG")]
     public static void LogFormat(string format, params object[] args)
 	{
-        UnityEngine.Debug.LogFormat(format, args)
+        UnityEngine.Debug.LogFormat(format, args);
     }
 
     [Conditional("DEBUG")]
