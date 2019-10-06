@@ -5,6 +5,9 @@ using UnityEngine;
 /// <summary>
 /// データリストをもとにしてスクロール内の要素(セル）を
 /// 使いまわして高速なスクロールを行うためのコントローラクラス
+/// Cellプレハブは
+/// Verticalの場合、Pivot(0.5f,1.0f)、Anchors(min(0.5,1),max(0.5,1))
+/// Horizontalの場合、Pivot(0.0f, 0.5f), Anchors(min(0,0.5f),max(0.0f, 0.5f))
 /// </summary>
 public class ScrollControllerBase : MonoBehaviour
 {
@@ -71,9 +74,8 @@ public class ScrollControllerBase : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-            ScrollDown();
-            ScrollUp();
+        ScrollDown();
+        ScrollUp();
     }
 
     void ScrollDown()
