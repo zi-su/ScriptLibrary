@@ -22,7 +22,9 @@ public class ScrollControllerBase : MonoBehaviour
     [SerializeField]
     float _space;
     [SerializeField]
-    Vector2 _margin;
+    float _marginTop;
+    [SerializeField]
+    float _marginBottom;
 
     [SerializeField]
     GameObject _cellPrefab;
@@ -127,11 +129,13 @@ public class ScrollControllerBase : MonoBehaviour
     void CalcContentSize()
     {
         float size = 0.0f;
+        size += _marginTop;
         for(int i = 0; i < _cellDataList.Count; i++)
         {
             size += GetCellSize(i);
         }
         size += _space * (_cellDataList.Count - 1);
+        size += _marginBottom;
         Vector2 sizeDelta = _contentRect.sizeDelta;
         if (_mode == Mode.Horizontal) { sizeDelta.x = size; }
         else { sizeDelta.y = size; }
@@ -181,7 +185,7 @@ public class ScrollControllerBase : MonoBehaviour
             var cell = Instantiate(_cellPrefab, _contentRect);
             var rect = cell.transform as RectTransform;
             var pos = rect.anchoredPosition;
-            p += i == 0 ? 0 : GetCellSize(i - 1) + _space;
+            p += i == 0 ?  _marginTop : GetCellSize(i - 1) + _space;
             if (_mode == Mode.Horizontal) { pos.x = p; }
             else { pos.y = -p; }
             rect.anchoredPosition = pos;
@@ -221,8 +225,12 @@ public class ScrollControllerBase : MonoBehaviour
         var last = _cellLinkList.Last;
         var lastTrans = last.Value.transform as RectTransform;
         var pos = firstTrans.anchoredPosition;
-        if (_mode == Mode.Horizontal) { pos.x = lastTrans.anchoredPosition.x + (lastTrans.sizeDelta.x + _space); }
-        else { pos.y = lastTrans.anchoredPosition.y - (lastTrans.sizeDelta.y + _space); }
+        if (_mode == Mode.Horizontal) {
+            pos.x = lastTrans.anchoredPosition.x + (lastTrans.sizeDelta.x + _space);
+        }
+        else {
+            pos.y = lastTrans.anchoredPosition.y - (lastTrans.sizeDelta.y + _space);
+        }
         
         firstTrans.anchoredPosition = pos;
 
