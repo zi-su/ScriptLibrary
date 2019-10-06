@@ -29,7 +29,6 @@ public class ScrollControllerBase : MonoBehaviour
     int _cellNum = 0;
 
     int _cellDataIndex = 0;
-    int _cellViewIndex = 0;
 
     float _diffMove;
 
@@ -40,7 +39,7 @@ public class ScrollControllerBase : MonoBehaviour
 
     float GetContentAnchoredPos()
     {
-        return _mode == Mode.Horizontal ? _contentRect.anchoredPosition.x : _contentRect.anchoredPosition.y;
+        return _mode == Mode.Horizontal ? -_contentRect.anchoredPosition.x : _contentRect.anchoredPosition.y;
     }
 
     float GetContentSize()
@@ -52,17 +51,17 @@ public class ScrollControllerBase : MonoBehaviour
     void Start()
     {
         AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 200.0f));
+        AddData(new CellDataBase(200.0f, 200.0f));
         AddData(new CellDataBase(100.0f, 100.0f));
         AddData(new CellDataBase(100.0f, 200.0f));
+        AddData(new CellDataBase(300.0f, 100.0f));
         AddData(new CellDataBase(100.0f, 100.0f));
         AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 300.0f));
+        AddData(new CellDataBase(200.0f, 300.0f));
         AddData(new CellDataBase(100.0f, 200.0f));
         AddData(new CellDataBase(100.0f, 100.0f));
         AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
+        AddData(new CellDataBase(400.0f, 100.0f));
 
         CalcContentSize();
         _cellNum = CalcCellNum();
@@ -72,15 +71,15 @@ public class ScrollControllerBase : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ScrollDown();
-        ScrollUp();
+        
+            ScrollDown();
+            ScrollUp();
     }
 
     void ScrollDown()
     {
         while (GetContentAnchoredPos() + _diffMove > GetCellSize(_cellDataIndex))
         {
-            if (_contentRect.anchoredPosition.y > _contentRect.sizeDelta.y - _scrollRect.sizeDelta.y) { return; }
             if (_cellDataIndex + _cellNum >= _cellDataList.Count) { return; }
             _diffMove -= GetCellSize(_cellDataIndex);
 
@@ -98,7 +97,7 @@ public class ScrollControllerBase : MonoBehaviour
     {
         while (GetContentAnchoredPos() + _diffMove < 0.0f)
         {
-            if (_contentRect.anchoredPosition.y < 0.0f) { return; }
+            if (GetContentAnchoredPos() < 0.0f) { return; }
             
             _cellDataIndex--;
             _diffMove += GetCellSize(_cellDataIndex);
@@ -121,13 +120,15 @@ public class ScrollControllerBase : MonoBehaviour
     /// </summary>
     void CalcContentSize()
     {
-        var size = _contentRect.sizeDelta;
-        size.y = 0.0f;
-        foreach (var item in _cellDataList)
+        float size = 0.0f;
+        for(int i = 0; i < _cellDataList.Count; i++)
         {
-            size.y += item.GetCellSize().y;
+            size += GetCellSize(i);
         }
-        _contentRect.sizeDelta = size;
+        Vector2 sizeDelta = _contentRect.sizeDelta;
+        if (_mode == Mode.Horizontal) { sizeDelta.x = size; }
+        else { sizeDelta.y = size; }
+        _contentRect.sizeDelta = sizeDelta;
     }
 
     /// <summary>
@@ -137,15 +138,16 @@ public class ScrollControllerBase : MonoBehaviour
     int CalcCellNum()
     {
         int num = 0;
-        float scrollSize = _scrollRect.sizeDelta.y;
+        float scrollSize = _mode == Mode.Horizontal ? _scrollRect.sizeDelta.x : _scrollRect.sizeDelta.y;
         float minCellSize = int.MaxValue;
-        foreach (var item in _cellDataList)
+        for (int i = 0; i < _cellDataList.Count; i++)
         {
-            if(item.GetCellSize().y < minCellSize)
+            if (GetCellSize(i) < minCellSize)
             {
-                minCellSize = item.GetCellSize().y;
+                minCellSize = GetCellSize(i);
             }
         }
+        
         for(int i = 0; i < _cellDataList.Count; i++)
         {
             scrollSize -= minCellSize;
@@ -172,7 +174,8 @@ public class ScrollControllerBase : MonoBehaviour
             var rect = cell.transform as RectTransform;
             var pos = rect.anchoredPosition;
             p += i == 0 ? 0 : GetCellSize(i - 1);
-            pos.y = -p;
+            if (_mode == Mode.Horizontal) { pos.x = p; }
+            else { pos.y = -p; }
             rect.anchoredPosition = pos;
             var view = cell.GetComponent<ICellView>();
             view.UpdateView(_cellDataList[i]);
@@ -192,7 +195,9 @@ public class ScrollControllerBase : MonoBehaviour
         var firstTrans = first.Value.transform as RectTransform;
 
         var pos = lastTrans.anchoredPosition;
-        pos.y = firstTrans.anchoredPosition.y + GetCellSize(_cellDataIndex);
+        if (_mode == Mode.Horizontal) { pos.x = firstTrans.anchoredPosition.x - GetCellSize(_cellDataIndex); }
+        else { pos.y = firstTrans.anchoredPosition.y + GetCellSize(_cellDataIndex); }
+        
         lastTrans.anchoredPosition = pos;
         var view = last.Value.GetComponent<ICellView>();
         view.UpdateView(_cellDataList[_cellDataIndex]);
@@ -208,7 +213,9 @@ public class ScrollControllerBase : MonoBehaviour
         var last = _cellLinkList.Last;
         var lastTrans = last.Value.transform as RectTransform;
         var pos = firstTrans.anchoredPosition;
-        pos.y = lastTrans.anchoredPosition.y - lastTrans.sizeDelta.y;
+        if (_mode == Mode.Horizontal) { pos.x = lastTrans.anchoredPosition.x + lastTrans.sizeDelta.x; }
+        else { pos.y = lastTrans.anchoredPosition.y - lastTrans.sizeDelta.y; }
+        
         firstTrans.anchoredPosition = pos;
 
         var view = first.Value.GetComponent<ICellView>();
