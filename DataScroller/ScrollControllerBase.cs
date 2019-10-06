@@ -59,6 +59,7 @@ public class ScrollControllerBase : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //テストコード
         AddData(new CellDataBase(100.0f, 100.0f));
         AddData(new CellDataBase(200.0f, 200.0f));
         AddData(new CellDataBase(100.0f, 100.0f));
@@ -77,6 +78,13 @@ public class ScrollControllerBase : MonoBehaviour
         InstantiateCell();
     }
 
+    public void Initialize(List<CellDataBase> dataList)
+    {
+        _cellDataList.AddRange(dataList);
+        CalcContentSize();
+        _cellNum = CalcCellNum();
+        InstantiateCell();
+    }
     // Update is called once per frame
     void Update()
     {
