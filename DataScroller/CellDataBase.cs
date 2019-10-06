@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// スクロール内の1要素を表すデータ
+/// スクロール内の1要素を表すデータクラス
 /// </summary>
 public class CellDataBase : ICellData
 {
