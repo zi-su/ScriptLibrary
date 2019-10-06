@@ -19,6 +19,10 @@ public class ScrollControllerBase : MonoBehaviour
 
     [SerializeField]
     Mode _mode;
+    [SerializeField]
+    float _space;
+    [SerializeField]
+    Vector2 _margin;
 
     [SerializeField]
     GameObject _cellPrefab;
@@ -83,7 +87,7 @@ public class ScrollControllerBase : MonoBehaviour
         while (GetContentAnchoredPos() + _diffMove > GetCellSize(_cellDataIndex))
         {
             if (_cellDataIndex + _cellNum >= _cellDataList.Count) { return; }
-            _diffMove -= GetCellSize(_cellDataIndex);
+            _diffMove -= (GetCellSize(_cellDataIndex) + _space);
 
             
             MoveLast();
@@ -102,7 +106,7 @@ public class ScrollControllerBase : MonoBehaviour
             if (GetContentAnchoredPos() < 0.0f) { return; }
             
             _cellDataIndex--;
-            _diffMove += GetCellSize(_cellDataIndex);
+            _diffMove += (GetCellSize(_cellDataIndex) + _space);
 
             MoveFirst();
 
@@ -127,6 +131,7 @@ public class ScrollControllerBase : MonoBehaviour
         {
             size += GetCellSize(i);
         }
+        size += _space * (_cellDataList.Count - 1);
         Vector2 sizeDelta = _contentRect.sizeDelta;
         if (_mode == Mode.Horizontal) { sizeDelta.x = size; }
         else { sizeDelta.y = size; }
@@ -153,6 +158,7 @@ public class ScrollControllerBase : MonoBehaviour
         for(int i = 0; i < _cellDataList.Count; i++)
         {
             scrollSize -= minCellSize;
+            scrollSize -= i == 0 ? 0.0f : _space;
             if(scrollSize < 0)
             {
                 num++;
@@ -175,7 +181,7 @@ public class ScrollControllerBase : MonoBehaviour
             var cell = Instantiate(_cellPrefab, _contentRect);
             var rect = cell.transform as RectTransform;
             var pos = rect.anchoredPosition;
-            p += i == 0 ? 0 : GetCellSize(i - 1);
+            p += i == 0 ? 0 : GetCellSize(i - 1) + _space;
             if (_mode == Mode.Horizontal) { pos.x = p; }
             else { pos.y = -p; }
             rect.anchoredPosition = pos;
@@ -197,8 +203,8 @@ public class ScrollControllerBase : MonoBehaviour
         var firstTrans = first.Value.transform as RectTransform;
 
         var pos = lastTrans.anchoredPosition;
-        if (_mode == Mode.Horizontal) { pos.x = firstTrans.anchoredPosition.x - GetCellSize(_cellDataIndex); }
-        else { pos.y = firstTrans.anchoredPosition.y + GetCellSize(_cellDataIndex); }
+        if (_mode == Mode.Horizontal) { pos.x = firstTrans.anchoredPosition.x - (GetCellSize(_cellDataIndex) + _space); }
+        else { pos.y = firstTrans.anchoredPosition.y + (GetCellSize(_cellDataIndex) + _space); }
         
         lastTrans.anchoredPosition = pos;
         var view = last.Value.GetComponent<ICellView>();
@@ -215,8 +221,8 @@ public class ScrollControllerBase : MonoBehaviour
         var last = _cellLinkList.Last;
         var lastTrans = last.Value.transform as RectTransform;
         var pos = firstTrans.anchoredPosition;
-        if (_mode == Mode.Horizontal) { pos.x = lastTrans.anchoredPosition.x + lastTrans.sizeDelta.x; }
-        else { pos.y = lastTrans.anchoredPosition.y - lastTrans.sizeDelta.y; }
+        if (_mode == Mode.Horizontal) { pos.x = lastTrans.anchoredPosition.x + (lastTrans.sizeDelta.x + _space); }
+        else { pos.y = lastTrans.anchoredPosition.y - (lastTrans.sizeDelta.y + _space); }
         
         firstTrans.anchoredPosition = pos;
 
