@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// スクロール時に1要素の表示更新をするためのクラス
+/// </summary>
 public class CellViewSimple : MonoBehaviour, ICellView
 {
     public void UpdateView(ICellData cellData)

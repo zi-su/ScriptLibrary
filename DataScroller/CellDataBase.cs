@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// スクロール内の1要素を表すデータ
+/// </summary>
 public class CellDataBase : ICellData
 {
     protected Vector2 cellSize;
