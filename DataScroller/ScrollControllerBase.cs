@@ -32,6 +32,22 @@ public class ScrollControllerBase : MonoBehaviour
     int _cellViewIndex = 0;
 
     float _diffMove;
+
+    float GetCellSize(int dataIndex)
+    {
+        return _mode == Mode.Horizontal ? _cellDataList[dataIndex].GetCellSize().x : _cellDataList[dataIndex].GetCellSize().y;
+    }
+
+    float GetContentAnchoredPos()
+    {
+        return _mode == Mode.Horizontal ? _contentRect.anchoredPosition.x : _contentRect.anchoredPosition.y;
+    }
+
+    float GetContentSize()
+    {
+        return _mode == Mode.Horizontal ? _contentRect.sizeDelta.x : _contentRect.sizeDelta.y;
+    }
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -62,12 +78,13 @@ public class ScrollControllerBase : MonoBehaviour
 
     void ScrollDown()
     {
-        while (_contentRect.anchoredPosition.y + _diffMove > _cellDataList[_cellDataIndex].GetCellSize().y)
+        while (GetContentAnchoredPos() + _diffMove > GetCellSize(_cellDataIndex))
         {
             if (_contentRect.anchoredPosition.y > _contentRect.sizeDelta.y - _scrollRect.sizeDelta.y) { return; }
-            if (_cellDataIndex + _cellNum > _cellDataList.Count) { return; }
-            _diffMove -= _cellDataList[_cellDataIndex].GetCellSize().y;
+            if (_cellDataIndex + _cellNum >= _cellDataList.Count) { return; }
+            _diffMove -= GetCellSize(_cellDataIndex);
 
+            
             MoveLast();
 
             var first = _cellLinkList.First;
@@ -79,11 +96,12 @@ public class ScrollControllerBase : MonoBehaviour
 
     void ScrollUp()
     {
-        while (_contentRect.anchoredPosition.y + _diffMove < 0.0f)
+        while (GetContentAnchoredPos() + _diffMove < 0.0f)
         {
             if (_contentRect.anchoredPosition.y < 0.0f) { return; }
+            
             _cellDataIndex--;
-            _diffMove += _cellDataList[_cellDataIndex].GetCellSize().y;
+            _diffMove += GetCellSize(_cellDataIndex);
 
             MoveFirst();
 
@@ -153,7 +171,7 @@ public class ScrollControllerBase : MonoBehaviour
             var cell = Instantiate(_cellPrefab, _contentRect);
             var rect = cell.transform as RectTransform;
             var pos = rect.anchoredPosition;
-            p += i == 0 ? 0 : _cellDataList[i - 1].GetCellSize().y;
+            p += i == 0 ? 0 : GetCellSize(i - 1);
             pos.y = -p;
             rect.anchoredPosition = pos;
             var view = cell.GetComponent<ICellView>();
@@ -174,8 +192,10 @@ public class ScrollControllerBase : MonoBehaviour
         var firstTrans = first.Value.transform as RectTransform;
 
         var pos = lastTrans.anchoredPosition;
-        pos.y = firstTrans.anchoredPosition.y + lastTrans.sizeDelta.y;
+        pos.y = firstTrans.anchoredPosition.y + GetCellSize(_cellDataIndex);
         lastTrans.anchoredPosition = pos;
+        var view = last.Value.GetComponent<ICellView>();
+        view.UpdateView(_cellDataList[_cellDataIndex]);
     }
 
     /// <summary>
@@ -190,5 +210,8 @@ public class ScrollControllerBase : MonoBehaviour
         var pos = firstTrans.anchoredPosition;
         pos.y = lastTrans.anchoredPosition.y - lastTrans.sizeDelta.y;
         firstTrans.anchoredPosition = pos;
+
+        var view = first.Value.GetComponent<ICellView>();
+        view.UpdateView(_cellDataList[_cellDataIndex + _cellNum]);
     }
 }
