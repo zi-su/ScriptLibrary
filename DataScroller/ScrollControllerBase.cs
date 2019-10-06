@@ -60,24 +60,29 @@ public class ScrollControllerBase : MonoBehaviour
     void Start()
     {
         //テストコード
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(200.0f, 200.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 200.0f));
-        AddData(new CellDataBase(300.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(200.0f, 300.0f));
-        AddData(new CellDataBase(100.0f, 200.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(100.0f, 100.0f));
-        AddData(new CellDataBase(400.0f, 100.0f));
+        TestData();
 
         CalcContentSize();
         _cellNum = CalcCellNum();
         InstantiateCell();
     }
 
+    void TestData()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            AddData(new CellDataBase(100.0f, 100.0f));
+            AddData(new CellDataBase(200.0f, 200.0f));
+            AddData(new CellDataBase(100.0f, 100.0f));
+            AddData(new CellDataBase(100.0f, 200.0f));
+            AddData(new CellDataBase(300.0f, 100.0f));
+            AddData(new CellDataBase(100.0f, 100.0f));
+            AddData(new CellDataBase(100.0f, 100.0f));
+            AddData(new CellDataBase(200.0f, 300.0f));
+            AddData(new CellDataBase(100.0f, 200.0f));
+            AddData(new CellDataBase(100.0f, 100.0f));
+        }
+    }
     public void Initialize(List<CellDataBase> dataList)
     {
         _cellDataList.AddRange(dataList);
