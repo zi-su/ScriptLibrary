@@ -11,13 +11,13 @@ public class FindReferencedAsset : Editor
         Stopwatch sw = new Stopwatch();
         sw.Start();
         var guids = Selection.assetGUIDs;
+        var allassetpath = AssetDatabase.GetAllAssetPaths();
         foreach (var guid in guids)
         {
-            var targetPath = AssetDatabase.GUIDToAssetPath(guid);
-            var allassetpath = AssetDatabase.GetAllAssetPaths();
+            var targetPath = AssetDatabase.GUIDToAssetPath(guid);    
             foreach (var a in allassetpath)
             {
-                var dependencies = AssetDatabase.GetDependencies(a);
+                var dependencies = AssetDatabase.GetDependencies(a, false);
                 foreach (var d in dependencies)
                 {
                     if(string.Equals(targetPath, d))
