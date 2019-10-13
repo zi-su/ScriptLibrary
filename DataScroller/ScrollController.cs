@@ -114,11 +114,11 @@ public class ScrollController : MonoBehaviour
 
     void ScrollDown()
     {
-        while (GetContentAnchoredPos() + _diffMove > GetCellSize(_cellDataIndex))
+        while (GetContentAnchoredPos() + _diffMove > _marginTop + GetCellSize(_cellDataIndex))
         {
             Debug.Log("ScrollDown");
             if (_cellDataIndex + _cellNum >= _cellDataList.Count) { return; }
-            _diffMove -= (GetCellSize(_cellDataIndex));
+            _diffMove -= (GetCellSize(_cellDataIndex)) + _space;
 
             
             MoveLast();
@@ -138,7 +138,7 @@ public class ScrollController : MonoBehaviour
             if (GetContentAnchoredPos() < 0.0f) { return; }
             
             _cellDataIndex--;
-            _diffMove += (GetCellSize(_cellDataIndex));
+            _diffMove += (GetCellSize(_cellDataIndex)) + _space;
 
             MoveFirst();
 
