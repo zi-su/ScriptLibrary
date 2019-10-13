@@ -9,7 +9,7 @@ using UnityEngine;
 /// Verticalの場合、Pivot(0.5f,1.0f)、Anchors(min(0.5,1),max(0.5,1))
 /// Horizontalの場合、Pivot(0.0f, 0.5f), Anchors(min(0,0.5f),max(0.0f, 0.5f))
 /// </summary>
-public class ScrollControllerBase : MonoBehaviour
+public class ScrollController : MonoBehaviour
 {
     enum Mode
     {
@@ -35,6 +35,7 @@ public class ScrollControllerBase : MonoBehaviour
 
     List<ICellData> _cellDataList = new List<ICellData>();
     LinkedList<GameObject> _cellLinkList = new LinkedList<GameObject>();
+    List<float> _cellPositionList = new List<float>();
     int _cellNum = 0;
 
     int _cellDataIndex = 0;
@@ -62,14 +63,12 @@ public class ScrollControllerBase : MonoBehaviour
         //テストコード
         TestData();
 
-        CalcContentSize();
-        _cellNum = CalcCellNum();
-        InstantiateCell();
+        Initialize(_cellDataList);
     }
 
     void TestData()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 5; i++)
         {
             AddData(new CellDataBase(100.0f, 100.0f));
             AddData(new CellDataBase(200.0f, 200.0f));
@@ -80,19 +79,35 @@ public class ScrollControllerBase : MonoBehaviour
             AddData(new CellDataBase(100.0f, 100.0f));
             AddData(new CellDataBase(200.0f, 300.0f));
             AddData(new CellDataBase(100.0f, 200.0f));
-            AddData(new CellDataBase(100.0f, 100.0f));
         }
     }
-    public void Initialize(List<CellDataBase> dataList)
+    public void Initialize(List<ICellData> dataList)
     {
         _cellDataList.AddRange(dataList);
         CalcContentSize();
         _cellNum = CalcCellNum();
-        InstantiateCell();
+        CalcCellPosFromDataList();
+        for (int i = 0; i < _cellNum; i++)
+        {
+            InstantiateCell(i);
+        }
+        AlignCell();
     }
+
+    public void Refresh(List<ICellData> dataList)
+    {
+        _cellDataList.Clear();
+        _cellDataList.AddRange(dataList);
+        CalcContentSize();
+        _cellNum = CalcCellNum();
+        RefreshCell();
+    }
+
+
     // Update is called once per frame
     void Update()
     {
+        if(_cellDataList.Count == 0) { return; }
         ScrollDown();
         ScrollUp();
     }
@@ -101,8 +116,9 @@ public class ScrollControllerBase : MonoBehaviour
     {
         while (GetContentAnchoredPos() + _diffMove > GetCellSize(_cellDataIndex))
         {
+            Debug.Log("ScrollDown");
             if (_cellDataIndex + _cellNum >= _cellDataList.Count) { return; }
-            _diffMove -= (GetCellSize(_cellDataIndex) + _space);
+            _diffMove -= (GetCellSize(_cellDataIndex));
 
             
             MoveLast();
@@ -118,10 +134,11 @@ public class ScrollControllerBase : MonoBehaviour
     {
         while (GetContentAnchoredPos() + _diffMove < 0.0f)
         {
+            Debug.Log("ScrollUp");
             if (GetContentAnchoredPos() < 0.0f) { return; }
             
             _cellDataIndex--;
-            _diffMove += (GetCellSize(_cellDataIndex) + _space);
+            _diffMove += (GetCellSize(_cellDataIndex));
 
             MoveFirst();
 
@@ -190,24 +207,58 @@ public class ScrollControllerBase : MonoBehaviour
     /// <summary>
     /// セルの生成処理
     /// </summary>
-    void InstantiateCell()
+    void InstantiateCell(int i)
     {
         float p = 0;
-        for(int i = 0; i < _cellNum; i++)
+        var cell = Instantiate(_cellPrefab, _contentRect);
+        var view = cell.GetComponent<ICellView>();
+        view.UpdateView(_cellDataList[i]);
+        _cellLinkList.AddLast(cell);
+    }
+
+    /// <summary>
+    /// データリストから各セル座標を計算してリストに保存
+    /// </summary>
+    void CalcCellPosFromDataList()
+    {
+        float p = 0.0f;
+        _cellPositionList.Clear();
+        for(int i = 0; i < _cellDataList.Count; i++)
         {
-            var cell = Instantiate(_cellPrefab, _contentRect);
-            var rect = cell.transform as RectTransform;
-            var pos = rect.anchoredPosition;
-            p += i == 0 ?  _marginTop : GetCellSize(i - 1) + _space;
-            if (_mode == Mode.Horizontal) { pos.x = p; }
-            else { pos.y = -p; }
-            rect.anchoredPosition = pos;
-            var view = cell.GetComponent<ICellView>();
-            view.UpdateView(_cellDataList[i]);
-            _cellLinkList.AddLast(cell);
+            p += i == 0 ? _marginTop : GetCellSize(i - 1) + _space;
+            _cellPositionList.Add(p);
         }
     }
 
+    /// <summary>
+    /// 座標リストからセルの座標を取得して設定
+    /// </summary>
+    void AlignCell()
+    {
+        for(int i = 0; i < _cellNum; i++)
+        {
+            var cell = _contentRect.GetChild(i) as RectTransform;
+            Vector3 pos = cell.anchoredPosition;
+            if (_mode == Mode.Horizontal) { pos.x = _cellPositionList[i]; }
+            else { pos.y = -_cellPositionList[i]; }
+            cell.anchoredPosition = pos;
+        }
+        
+    }
+    void RefreshCell()
+    {
+        //セル数多ければ破棄
+        if (_cellNum > _contentRect.childCount)
+        {
+
+        }
+        else if(_cellNum < _cellDataList.Count)
+        {
+
+        }
+
+        
+    }
     /// <summary>
     /// 末尾の要素を戦闘に移動する計算
     /// </summary>
