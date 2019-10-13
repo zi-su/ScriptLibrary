@@ -69,24 +69,24 @@ public class ScrollController : MonoBehaviour
     {
         //テストコード
         TestData();
-
-        Initialize(_cellDataList);
     }
 
     void TestData()
     {
-        for (int i = 0; i < 5; i++)
+        List<ICellData> list = new List<ICellData>()
         {
-            AddData(new CellDataBase(100.0f, 100.0f));
-            AddData(new CellDataBase(200.0f, 200.0f));
-            AddData(new CellDataBase(100.0f, 100.0f));
-            AddData(new CellDataBase(100.0f, 200.0f));
-            AddData(new CellDataBase(300.0f, 100.0f));
-            AddData(new CellDataBase(100.0f, 100.0f));
-            AddData(new CellDataBase(100.0f, 100.0f));
-            AddData(new CellDataBase(200.0f, 300.0f));
-            AddData(new CellDataBase(100.0f, 200.0f));
-        }
+            new CellDataBase(100.0f, 100.0f),
+            new CellDataBase(100.0f, 150.0f),
+            new CellDataBase(100.0f, 50.0f),
+            new CellDataBase(100.0f, 200.0f),
+            new CellDataBase(100.0f, 100.0f),
+            new CellDataBase(100.0f, 150.0f),
+            new CellDataBase(100.0f, 100.0f),
+            new CellDataBase(100.0f, 100.0f),
+            new CellDataBase(100.0f, 250.0f),
+        };
+
+        Initialize(list);
     }
     public void Initialize(List<ICellData> dataList)
     {
@@ -147,14 +147,9 @@ public class ScrollController : MonoBehaviour
             List<ICellData> d = new List<ICellData>()
             {
                 new CellDataBase(100.0f, 100.0f),
-                new CellDataBase(100.0f, 150.0f),
-                new CellDataBase(100.0f, 50.0f),
-                new CellDataBase(100.0f, 200.0f),
-                new CellDataBase(100.0f, 100.0f),
-                new CellDataBase(100.0f, 150.0f),
-                new CellDataBase(100.0f, 100.0f),
-                new CellDataBase(100.0f, 100.0f),
-                new CellDataBase(100.0f, 250.0f),
+            new CellDataBase(200.0f, 200.0f),
+            new CellDataBase(100.0f, 100.0f),
+            new CellDataBase(100.0f, 200.0f)
             };
             Refresh(d);
         }
@@ -251,7 +246,7 @@ public class ScrollController : MonoBehaviour
         num++;
         if(num > _cellDataList.Count)
         {
-            num = _cellDataList.Count - 1;
+            num = _cellDataList.Count;
         }
         return num;
     }
@@ -302,11 +297,16 @@ public class ScrollController : MonoBehaviour
         //多ければ生成、少なければ破棄
         if (_cellNum > _contentRectTransform.childCount)
         {
-            
+            var count = _cellNum - _contentRectTransform.childCount;
+            for (int i = 0; i < count; i++)
+            {
+                Instantiate(_cellPrefab, _contentRectTransform);
+            }
         }
         else if(_cellNum < _contentRectTransform.childCount)
         {
-            for (int i = _cellNum; i < _contentRectTransform.childCount; i++)
+            int count = _contentRectTransform.childCount;
+            for (int i = _cellNum; i < count; i++)
             {
                 Destroy(_contentRectTransform.GetChild(i).gameObject);
             }
