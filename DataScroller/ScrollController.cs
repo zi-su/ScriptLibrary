@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 /// <summary>
 /// データリストをもとにしてスクロール内の要素(セル）を
 /// 使いまわして高速なスクロールを行うためのコントローラクラス
@@ -16,7 +16,8 @@ public class ScrollController : MonoBehaviour
         Horizontal,
         Vertical,
     }
-
+    [SerializeField]
+    ScrollRect _scrollRect;
     [SerializeField]
     Mode _mode;
     [SerializeField]
@@ -31,9 +32,9 @@ public class ScrollController : MonoBehaviour
     [SerializeField]
     GameObject _cellPrefab;
     [SerializeField]
-    RectTransform _scrollRect;
+    RectTransform _scrollRectTransform;
     [SerializeField]
-    RectTransform _contentRect;
+    RectTransform _contentRectTransform;
 
     List<ICellData> _cellDataList = new List<ICellData>();
     LinkedList<GameObject> _cellLinkList = new LinkedList<GameObject>();
@@ -51,12 +52,12 @@ public class ScrollController : MonoBehaviour
 
     float GetContentAnchoredPos()
     {
-        return _mode == Mode.Horizontal ? -_contentRect.anchoredPosition.x : _contentRect.anchoredPosition.y;
+        return _mode == Mode.Horizontal ? -_contentRectTransform.anchoredPosition.x : _contentRectTransform.anchoredPosition.y;
     }
 
     float GetContentSize()
     {
-        return _mode == Mode.Horizontal ? _contentRect.sizeDelta.x : _contentRect.sizeDelta.y;
+        return _mode == Mode.Horizontal ? _contentRectTransform.sizeDelta.x : _contentRectTransform.sizeDelta.y;
     }
     
     float GetSpace()
@@ -110,16 +111,53 @@ public class ScrollController : MonoBehaviour
         _cellDataList.AddRange(dataList);
         CalcContentSize();
         _cellNum = CalcCellNum();
+        CalcCellPosFromDataList();
+        ResetNormalizePosition();
         RefreshCell();
+        AlignCell();
+
     }
 
-
+    void ResetNormalizePosition()
+    {
+        var pos = _contentRectTransform.anchoredPosition;
+        if (_mode == Mode.Horizontal) {
+            pos.x = 0.0f;
+            _scrollRect.horizontalNormalizedPosition = 0.0f;
+            _diffMove = 0.0f;
+            _cellDataIndex = 0;
+        }
+        else {
+            pos.y = 0.0f;
+            _scrollRect.verticalNormalizedPosition = 1.0f;
+            _diffMove = 0.0f;
+            _cellDataIndex = 0;
+        }
+    }
     // Update is called once per frame
     void Update()
     {
         if(_cellDataList.Count == 0) { return; }
+
         ScrollDown();
         ScrollUp();
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            List<ICellData> d = new List<ICellData>()
+            {
+                new CellDataBase(100.0f, 100.0f),
+                new CellDataBase(100.0f, 150.0f),
+                new CellDataBase(100.0f, 50.0f),
+                new CellDataBase(100.0f, 200.0f),
+                new CellDataBase(100.0f, 100.0f),
+                new CellDataBase(100.0f, 150.0f),
+                new CellDataBase(100.0f, 100.0f),
+                new CellDataBase(100.0f, 100.0f),
+                new CellDataBase(100.0f, 250.0f),
+            };
+            Refresh(d);
+        }
     }
 
     void ScrollDown()
@@ -176,10 +214,10 @@ public class ScrollController : MonoBehaviour
         }
         size += GetSpace() * (_cellDataList.Count - 1);
         size += _marginBottom;
-        Vector2 sizeDelta = _contentRect.sizeDelta;
+        Vector2 sizeDelta = _contentRectTransform.sizeDelta;
         if (_mode == Mode.Horizontal) { sizeDelta.x = size; }
         else { sizeDelta.y = size; }
-        _contentRect.sizeDelta = sizeDelta;
+        _contentRectTransform.sizeDelta = sizeDelta;
     }
 
     /// <summary>
@@ -189,7 +227,7 @@ public class ScrollController : MonoBehaviour
     int CalcCellNum()
     {
         int num = 0;
-        float scrollSize = _mode == Mode.Horizontal ? _scrollRect.sizeDelta.x : _scrollRect.sizeDelta.y;
+        float scrollSize = _mode == Mode.Horizontal ? _scrollRectTransform.sizeDelta.x : _scrollRectTransform.sizeDelta.y;
         float minCellSize = int.MaxValue;
         for (int i = 0; i < _cellDataList.Count; i++)
         {
@@ -198,7 +236,7 @@ public class ScrollController : MonoBehaviour
                 minCellSize = GetCellSize(i);
             }
         }
-        
+        scrollSize -= _marginTop;
         for(int i = 0; i < _cellDataList.Count; i++)
         {
             scrollSize -= minCellSize;
@@ -211,6 +249,10 @@ public class ScrollController : MonoBehaviour
             num++;
         }
         num++;
+        if(num > _cellDataList.Count)
+        {
+            num = _cellDataList.Count - 1;
+        }
         return num;
     }
 
@@ -220,7 +262,7 @@ public class ScrollController : MonoBehaviour
     void InstantiateCell(int i)
     {
         float p = 0;
-        var cell = Instantiate(_cellPrefab, _contentRect);
+        var cell = Instantiate(_cellPrefab, _contentRectTransform);
         var view = cell.GetComponent<ICellView>();
         view.UpdateView(_cellDataList[i]);
         _cellLinkList.AddLast(cell);
@@ -247,7 +289,7 @@ public class ScrollController : MonoBehaviour
     {
         for(int i = 0; i < _cellNum; i++)
         {
-            var cell = _contentRect.GetChild(i) as RectTransform;
+            var cell = _contentRectTransform.GetChild(i) as RectTransform;
             Vector3 pos = cell.anchoredPosition;
             if (_mode == Mode.Horizontal) { pos.x = _cellPositionList[i]; }
             else { pos.y = -_cellPositionList[i]; }
@@ -257,17 +299,32 @@ public class ScrollController : MonoBehaviour
     }
     void RefreshCell()
     {
-        //セル数多ければ破棄
-        if (_cellNum > _contentRect.childCount)
+        //多ければ生成、少なければ破棄
+        if (_cellNum > _contentRectTransform.childCount)
         {
-
+            
         }
-        else if(_cellNum < _cellDataList.Count)
+        else if(_cellNum < _contentRectTransform.childCount)
         {
-
+            for (int i = _cellNum; i < _contentRectTransform.childCount; i++)
+            {
+                Destroy(_contentRectTransform.GetChild(i).gameObject);
+            }
         }
 
-        
+        //リンクリスト初期化
+        _cellLinkList.Clear();
+        for(int i = 0; i < _cellNum; i++)
+        {
+            _cellLinkList.AddLast(_contentRectTransform.GetChild(i).gameObject);
+        }
+
+        //表示内容を更新
+        for(int i = 0; i < _cellNum; i++)
+        {
+            var view = _contentRectTransform.GetChild(i).GetComponent<ICellView>();
+            view.UpdateView(_cellDataList[i]);
+        }
     }
     /// <summary>
     /// 末尾の要素を戦闘に移動する計算
