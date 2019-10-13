@@ -20,7 +20,9 @@ public class ScrollController : MonoBehaviour
     [SerializeField]
     Mode _mode;
     [SerializeField]
-    float _space;
+    float _spaceX;
+    [SerializeField]
+    float _spaceY;
     [SerializeField]
     float _marginTop;
     [SerializeField]
@@ -57,6 +59,10 @@ public class ScrollController : MonoBehaviour
         return _mode == Mode.Horizontal ? _contentRect.sizeDelta.x : _contentRect.sizeDelta.y;
     }
     
+    float GetSpace()
+    {
+        return _mode == Mode.Horizontal ? _spaceX : _spaceY;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -94,6 +100,10 @@ public class ScrollController : MonoBehaviour
         AlignCell();
     }
 
+    /// <summary>
+    /// 新しいデータリストでセルを更新する
+    /// </summary>
+    /// <param name="dataList"></param>
     public void Refresh(List<ICellData> dataList)
     {
         _cellDataList.Clear();
@@ -118,7 +128,7 @@ public class ScrollController : MonoBehaviour
         {
             Debug.Log("ScrollDown");
             if (_cellDataIndex + _cellNum >= _cellDataList.Count) { return; }
-            _diffMove -= (GetCellSize(_cellDataIndex)) + _space;
+            _diffMove -= (GetCellSize(_cellDataIndex)) + GetSpace();
 
             
             MoveLast();
@@ -138,7 +148,7 @@ public class ScrollController : MonoBehaviour
             if (GetContentAnchoredPos() < 0.0f) { return; }
             
             _cellDataIndex--;
-            _diffMove += (GetCellSize(_cellDataIndex)) + _space;
+            _diffMove += (GetCellSize(_cellDataIndex)) + GetSpace();
 
             MoveFirst();
 
@@ -164,7 +174,7 @@ public class ScrollController : MonoBehaviour
         {
             size += GetCellSize(i);
         }
-        size += _space * (_cellDataList.Count - 1);
+        size += GetSpace() * (_cellDataList.Count - 1);
         size += _marginBottom;
         Vector2 sizeDelta = _contentRect.sizeDelta;
         if (_mode == Mode.Horizontal) { sizeDelta.x = size; }
@@ -192,7 +202,7 @@ public class ScrollController : MonoBehaviour
         for(int i = 0; i < _cellDataList.Count; i++)
         {
             scrollSize -= minCellSize;
-            scrollSize -= i == 0 ? 0.0f : _space;
+            scrollSize -= i == 0 ? 0.0f : GetSpace();
             if(scrollSize < 0)
             {
                 num++;
@@ -225,7 +235,7 @@ public class ScrollController : MonoBehaviour
         _cellPositionList.Clear();
         for(int i = 0; i < _cellDataList.Count; i++)
         {
-            p += i == 0 ? _marginTop : GetCellSize(i - 1) + _space;
+            p += i == 0 ? _marginTop : GetCellSize(i - 1) + GetSpace();
             _cellPositionList.Add(p);
         }
     }
@@ -271,8 +281,8 @@ public class ScrollController : MonoBehaviour
         var firstTrans = first.Value.transform as RectTransform;
 
         var pos = lastTrans.anchoredPosition;
-        if (_mode == Mode.Horizontal) { pos.x = firstTrans.anchoredPosition.x - (GetCellSize(_cellDataIndex) + _space); }
-        else { pos.y = firstTrans.anchoredPosition.y + (GetCellSize(_cellDataIndex) + _space); }
+        if (_mode == Mode.Horizontal) { pos.x = firstTrans.anchoredPosition.x - (GetCellSize(_cellDataIndex) + GetSpace()); }
+        else { pos.y = firstTrans.anchoredPosition.y + (GetCellSize(_cellDataIndex) + GetSpace()); }
         
         lastTrans.anchoredPosition = pos;
         var view = last.Value.GetComponent<ICellView>();
@@ -290,10 +300,10 @@ public class ScrollController : MonoBehaviour
         var lastTrans = last.Value.transform as RectTransform;
         var pos = firstTrans.anchoredPosition;
         if (_mode == Mode.Horizontal) {
-            pos.x = lastTrans.anchoredPosition.x + (lastTrans.sizeDelta.x + _space);
+            pos.x = lastTrans.anchoredPosition.x + (lastTrans.sizeDelta.x + GetSpace());
         }
         else {
-            pos.y = lastTrans.anchoredPosition.y - (lastTrans.sizeDelta.y + _space);
+            pos.y = lastTrans.anchoredPosition.y - (lastTrans.sizeDelta.y + GetSpace());
         }
         
         firstTrans.anchoredPosition = pos;
