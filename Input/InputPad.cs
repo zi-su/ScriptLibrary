@@ -37,7 +37,7 @@ public class InputPad
     
 
     //前回入力状態
-    Data _prev = new Data();
+    Data prev = new Data();
     Data now = new Data();
 
     //全プラットフォーム共通ボタン定義
@@ -65,33 +65,58 @@ public class InputPad
     public bool L3 { get { return now.L3; } set { now.L3 = value; } }
     public bool R3 { get { return now.R3; } set { now.R3 = value; } }
 
+    //
+    public float PrevHorizontalLeft { get { return prev.HorizontalLeft; } set { prev.HorizontalLeft = value; } }
+    public float PrevVerticalLeft { get { return prev.VerticalLeft; } set { prev.VerticalLeft = value; } }
+    public float PrevHorizontalRight { get { return prev.HorizontalRight; } set { prev.HorizontalRight = value; } }
+    public float PrevVerticalRight { get { return prev.VerticalRight; } set { prev.VerticalRight = value; } }
+
+    public bool PrevButtonLeft { get { return prev.ButtonLeft; } set { prev.ButtonLeft = value; } }
+    public bool PrevButtonUp { get { return prev.ButtonUp; } set { prev.ButtonUp = value; } }
+    public bool PrevButtonRight { get { return prev.ButtonRight; } set { prev.ButtonRight = value; } }
+    public bool PrevButtonDown { get { return prev.ButtonDown; } set { prev.ButtonDown = value; } }
+
+    public bool PrevKeyLeft { get { return prev.KeyLeft; } set { prev.KeyLeft = value; } }
+    public bool PrevKeyUp { get { return prev.KeyUp; } set { prev.KeyUp = value; } }
+    public bool PrevKeyRight { get { return prev.KeyRight; } set { prev.KeyRight = value; } }
+    public bool PrevKeyDown { get { return prev.KeyDown; } set { prev.KeyDown = value; } }
+
+    public bool PrevL1 { get { return prev.L1; } set { prev.L1 = value; } }
+    public bool PrevR1 { get { return prev.R1; } set { prev.R1 = value; } }
+
+    public float PrevL2 { get { return prev.L2; } set { prev.L2 = value; } }
+    public float PrevR2 { get { return prev.R2; } set { prev.R2 = value; } }
+
+    public bool PrevL3 { get { return prev.L3; } set { prev.L3 = value; } }
+    public bool PrevR3 { get { return prev.R3; } set { prev.R3 = value; } }
+
     /// <summary>
     /// 前回情報に保存
     /// </summary>
     public void Backup()
     {
-        _prev.HorizontalLeft = now.HorizontalLeft;
-        _prev.VerticalLeft = now.VerticalLeft;
-        _prev.HorizontalRight = now.HorizontalRight;
-        _prev.VerticalRight = now.VerticalRight;
+        prev.HorizontalLeft = now.HorizontalLeft;
+        prev.VerticalLeft = now.VerticalLeft;
+        prev.HorizontalRight = now.HorizontalRight;
+        prev.VerticalRight = now.VerticalRight;
 
-        _prev.ButtonLeft = now.ButtonLeft;
-        _prev.ButtonUp = now.ButtonUp;
-        _prev.ButtonRight = now.ButtonRight;
-        _prev.ButtonDown = now.ButtonDown;
+        prev.ButtonLeft = now.ButtonLeft;
+        prev.ButtonUp = now.ButtonUp;
+        prev.ButtonRight = now.ButtonRight;
+        prev.ButtonDown = now.ButtonDown;
 
-        _prev.KeyLeft = now.KeyLeft;
-        _prev.KeyUp = now.KeyUp;
-        _prev.KeyRight = now.KeyRight;
-        _prev.KeyDown= now.KeyDown;
+        prev.KeyLeft = now.KeyLeft;
+        prev.KeyUp = now.KeyUp;
+        prev.KeyRight = now.KeyRight;
+        prev.KeyDown= now.KeyDown;
 
-        _prev.L1 = now.L1;
-        _prev.R1 = now.R1;
-        _prev.L2 = now.L2;
-        _prev.R2 = now.R2;
+        prev.L1 = now.L1;
+        prev.R1 = now.R1;
+        prev.L2 = now.L2;
+        prev.R2 = now.R2;
 
-        _prev.L3 = now.L3;
-        _prev.R3 = now.R3;
+        prev.L3 = now.L3;
+        prev.R3 = now.R3;
     }
 
     public void Clear()

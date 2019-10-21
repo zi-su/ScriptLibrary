@@ -2,64 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputStack
-{
-    
-
-    public enum ThumbStickType
-    {
-        LeftHorizontal,
-        LeftVertical,
-        RightHorizontal,
-        RightVertical,
-        Left,
-        Right,
-    }
-
-    Stack<InputPad> _inputPadStack = new Stack<InputPad>();
-    // Start is called before the first frame update
-    public void Awake()
-    {
-        _inputPadStack.Push(new InputPad());
-    }
-
-    // Update is called once per frame
-    public void Update()
-    {
-        //InputPadの現在状態をprevに保存
-        foreach (var item in _inputPadStack)
-        {
-            //InputPadの現在状態をprevに保存
-            item.Backup();
-            //InputPadの現在状態をクリア
-            item.Clear();
-
-            //InputPadにInputから収集した情報を設定
-            item.HorizontalLeft = Input.GetAxis("HorizontalLeft");
-            item.VerticalLeft = Input.GetAxis("VerticalLeft");
-            item.HorizontalRight = Input.GetAxis("HorizontalRight");
-            item.VerticalRight = Input.GetAxis("HorizontalRight");
-
-            item.ButtonLeft = Input.GetButton("ButtonLeft");
-            item.ButtonUp = Input.GetButton("ButtonUp");
-            item.ButtonRight = Input.GetButton("ButtonRight");
-            item.ButtonDown = Input.GetButton("ButtonDown");
-
-            item.KeyLeft = Input.GetKey("KeyLeft");
-            item.KeyUp = Input.GetKey("KeyUp");
-            item.KeyRight = Input.GetKey("KeyRight");
-            item.KeyDown = Input.GetKey("KeyDown");
-
-            item.L1 = Input.GetButton("L1");
-            item.R1 = Input.GetButton("R1");
-            item.L2 = (Input.GetAxis("L2") + 1.0f) / 2.0f;  //-1.0f~1.0fの範囲を0.0f~1.0fに変換
-            item.R2 = (Input.GetAxis("R2") + 1.0f) / 2.0f;  //-1.0f~1.0fの範囲を0.0f~1.0fに変換
-            item.L3 = Input.GetButton("L3");
-            item.R3 = Input.GetButton("R3");
-        }
-    }
-
-}
 public class InputType
 {
     public enum Button
@@ -146,8 +88,6 @@ public class InputManager : MonoBehaviour
             item.L3 = Input.GetButton("L3");
             item.R3 = Input.GetButton("R3");
         }
-
-        DebugPrint();
     }
 
     public bool IsTrigger(InputType.Button button)
@@ -157,46 +97,46 @@ public class InputManager : MonoBehaviour
         switch (button)
         {
             case InputType.Button.Left:
-                ret = peek.ButtonLeft;
+                ret = peek.ButtonLeft && !peek.PrevButtonLeft;
                 break;
             case InputType.Button.Up:
-                ret = peek.ButtonUp;
+                ret = peek.ButtonUp && !peek.PrevButtonUp;
                 break;
             case InputType.Button.Right:
-                ret = peek.ButtonRight;
+                ret = peek.ButtonRight && !peek.PrevButtonRight;
                 break;
             case InputType.Button.Down:
-                ret = peek.ButtonDown;
+                ret = peek.ButtonDown && !peek.PrevButtonDown;
                 break;
             case InputType.Button.KeyLeft:
-                ret = peek.KeyLeft;
+                ret = peek.KeyLeft && !peek.PrevKeyLeft;
                 break;
             case InputType.Button.KeyUp:
-                ret = peek.KeyUp;
+                ret = peek.KeyUp && !peek.PrevKeyUp;
                 break;
             case InputType.Button.KeyRight:
-                ret = peek.KeyRight;
+                ret = peek.KeyRight && !peek.PrevKeyRight;
                 break;
             case InputType.Button.KeyDown:
-                ret = peek.KeyDown;
+                ret = peek.KeyDown && !peek.PrevKeyDown;
                 break;
             case InputType.Button.L1:
-                ret = peek.L1;
+                ret = peek.L1 && !peek.PrevL1;
                 break;
             case InputType.Button.R1:
-                ret = peek.R1;
+                ret = peek.R1 && !peek.PrevR1;
                 break;
             case InputType.Button.L2:
-                ret = peek.L2 > _triggerDelta;
+                ret = peek.L2 > _triggerDelta && peek.PrevL2 < _triggerDelta;
                 break;
             case InputType.Button.R2:
-                ret = peek.R2 > _triggerDelta;
+                ret = peek.R2 > _triggerDelta && peek.PrevR2 < _triggerDelta;
                 break;
             case InputType.Button.L3:
-                ret = peek.L3;
+                ret = peek.L3 && !peek.PrevL3;
                 break;
             case InputType.Button.R3:
-                ret = peek.R3;
+                ret = peek.R3 && !peek.PrevR3;
                 break;
             case InputType.Button.Num:
                 break;
