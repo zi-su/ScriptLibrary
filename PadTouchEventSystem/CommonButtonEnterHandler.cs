@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class CommonButtonEnterHandler : EnterHandlerBase
 {
     [SerializeField]
-    Image _selectImage;
+    Image _selectImage = null;
     [SerializeField]
-    Image _disableImage;
+    Image _disableImage = null;
 
     public override void Select()
     {
