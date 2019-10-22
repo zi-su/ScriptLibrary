@@ -17,24 +17,32 @@ public abstract class EnterHandlerBase : MonoBehaviour, IPointerEnterHandler
             var handler = cgo.GetComponent<EnterHandlerBase>();
             if(handler != null)
             {
-                handler.Exit();
+                handler.Deselect();
             }
         }
 
         //現在選択を上書きして選択呼び出し
-        Enter();
+        Select();
         CustomEventSystem.CurrentSelected = gameObject;
     }
 
     /// <summary>
     /// 選択したときの処理
     /// </summary>
-    public abstract void Enter();
+    public abstract void Select();
 
     /// <summary>
     /// 選択解除されたときの処理
     /// </summary>
-    public abstract void Exit();
+    public abstract void Deselect();
 
+    /// <summary>
+    /// 決定したときの処理
+    /// </summary>
+    public abstract void Decide();
+
+    /// <summary>
+    /// 無効化
+    /// </summary>
     public abstract void Disable();
 }

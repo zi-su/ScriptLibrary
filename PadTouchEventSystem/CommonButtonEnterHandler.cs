@@ -10,16 +10,20 @@ public class CommonButtonEnterHandler : EnterHandlerBase
     [SerializeField]
     Image _disableImage;
 
-    public override void Enter()
+    public override void Select()
     {
         _selectImage.enabled = true;
     }
 
-    public override void Exit()
+    public override void Deselect()
     {
         _selectImage.enabled = false;
     }
 
+    public override void Decide()
+    {
+        
+    }
     public override void Disable()
     {
         _disableImage.enabled = true;
