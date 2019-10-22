@@ -2,52 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputType
-{
-    public enum Button
-    {
-        Left,    //□
-        Up,    //△
-        Right,    //○
-        Down,    //☓
-
-        KeyLeft,    //←
-        KeyUp,    //↑
-        KeyRight,    //→
-        KeyDown,    //↓
-
-        L1,
-        R1,
-        L2,
-        R2,
-
-        L3,
-        R3,
-        Num,
-    }
-
-    public enum Analog
-    {
-        HorizontalLeft,
-        VerticalLeft,
-        HorizontalRight,
-        VerticalRight,
-        L2,
-        R2,
-    }
-
-    public enum ThumbStick
-    {
-        Left,
-        Right,
-    }
-}
 
 public class InputManager : MonoBehaviour
 {
 
     Stack<InputPad> _inputPadStack = new Stack<InputPad>();
     float _triggerDelta = 0.5f;
+    float _repeatWait = 0.0f;
+    const float RepeatStartWait = 3.0f;
+    const float RepeatingWait = 0.3f;
+    enum RepeatState
+    {
+        Invalid,
+        Start,
+        Repeat,
+    }
+    RepeatState _repeatState = RepeatState.Invalid;
 
     private void Awake()
     {
@@ -90,6 +60,61 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    public bool IsPress(InputType.Button button)
+    {
+        bool ret = false;
+        var peek = _inputPadStack.Peek();
+        switch (button)
+        {
+            case InputType.Button.Left:
+                ret = peek.ButtonLeft;
+                break;
+            case InputType.Button.Up:
+                ret = peek.ButtonUp;
+                break;
+            case InputType.Button.Right:
+                ret = peek.ButtonRight;
+                break;
+            case InputType.Button.Down:
+                ret = peek.ButtonDown;
+                break;
+            case InputType.Button.KeyLeft:
+                ret = peek.KeyLeft;
+                break;
+            case InputType.Button.KeyUp:
+                ret = peek.KeyUp;
+                break;
+            case InputType.Button.KeyRight:
+                ret = peek.KeyRight;
+                break;
+            case InputType.Button.KeyDown:
+                ret = peek.KeyDown;
+                break;
+            case InputType.Button.L1:
+                ret = peek.L1;
+                break;
+            case InputType.Button.R1:
+                ret = peek.R1;
+                break;
+            case InputType.Button.L2:
+                ret = peek.L2 > _triggerDelta;
+                break;
+            case InputType.Button.R2:
+                ret = peek.R2 > _triggerDelta;
+                break;
+            case InputType.Button.L3:
+                ret = peek.L3;
+                break;
+            case InputType.Button.R3:
+                ret = peek.R3;
+                break;
+            case InputType.Button.Num:
+                break;
+            default:
+                break;
+        }
+        return ret;
+    }
     public bool IsTrigger(InputType.Button button)
     {
         bool ret = false;
@@ -146,6 +171,45 @@ public class InputManager : MonoBehaviour
         return ret;
     }
 
+    public bool IsRepeat(InputType.Button button)
+    {
+        bool ret = false;
+        if (IsPress(button))
+        {
+            switch (_repeatState)
+            {
+                case RepeatState.Invalid:
+                    _repeatState = RepeatState.Start;
+                    _repeatWait = RepeatStartWait;
+                    ret = true;
+                    break;
+                case RepeatState.Start:
+                    _repeatWait -= Time.deltaTime;
+                    if(_repeatWait < 0.0f)
+                    {
+                        _repeatState = RepeatState.Repeat;
+                        _repeatWait = RepeatingWait;
+                        ret = true;
+                    }
+                    break;
+                case RepeatState.Repeat:
+                    _repeatWait -= Time.deltaTime;
+                    if(_repeatWait < 0.0f)
+                    {
+                        _repeatWait = RepeatingWait;
+                        ret = true;
+                    }
+                    break;
+                default:
+                    break;
+            }    
+        }
+        else
+        {
+            _repeatState = RepeatState.Invalid;
+        }
+        return ret;
+    }
     public float GetAnalog(InputType.Analog Analog)
     {
         float ret = 0.0f;
