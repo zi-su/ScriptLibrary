@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DefaultExecutionOrder(-100)]
-public class InputManager : Singleton<InputManager>
+public class InputManager : SingletonMonobehaviour<InputManager>
 {
-
+    
     Stack<InputPad> _inputPadStack = new Stack<InputPad>();
     float _triggerDelta = 0.5f;
     float _repeatWait = 0.0f;
     const float RepeatStartWait = 1.0f;
     const float RepeatingWait = 0.05f;
+    
     enum RepeatState
     {
         Stop,
@@ -19,10 +20,11 @@ public class InputManager : Singleton<InputManager>
     }
     RepeatState _repeatState = RepeatState.Stop;
 
-    private void Awake()
+    protected override void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        base.Awake();
         _inputPadStack.Push(new InputPad());
+        gameObject.name = "InputManager";
     }
 
     public void Update()
