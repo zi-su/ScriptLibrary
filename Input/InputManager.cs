@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class InputManager : MonoBehaviour
+[DefaultExecutionOrder(-100)]
+public class InputManager : Singleton<InputManager>
 {
 
     Stack<InputPad> _inputPadStack = new Stack<InputPad>();
     float _triggerDelta = 0.5f;
     float _repeatWait = 0.0f;
-    const float RepeatStartWait = 3.0f;
-    const float RepeatingWait = 0.3f;
+    const float RepeatStartWait = 1.0f;
+    const float RepeatingWait = 0.05f;
     enum RepeatState
     {
-        Invalid,
+        Stop,
         Start,
         Repeat,
     }
-    RepeatState _repeatState = RepeatState.Invalid;
+    RepeatState _repeatState = RepeatState.Stop;
 
     private void Awake()
     {
@@ -178,7 +178,7 @@ public class InputManager : MonoBehaviour
         {
             switch (_repeatState)
             {
-                case RepeatState.Invalid:
+                case RepeatState.Stop:
                     _repeatState = RepeatState.Start;
                     _repeatWait = RepeatStartWait;
                     ret = true;
@@ -206,7 +206,7 @@ public class InputManager : MonoBehaviour
         }
         else
         {
-            _repeatState = RepeatState.Invalid;
+            _repeatState = RepeatState.Stop;
         }
         return ret;
     }
