@@ -7,6 +7,29 @@ using UnityEngine;
 /// </summary>
 public class InputPad
 {
+
+    float _triggerDelta = 0.5f;
+    float _repeatWait = 0.0f;
+    const float RepeatStartWait = 1.0f;
+    const float RepeatingWait = 0.05f;
+    public bool IsEnable
+    {
+        get;set;
+    }
+
+    enum RepeatState
+    {
+        Stop,
+        Start,
+        Repeat,
+    }
+    RepeatState _repeatState = RepeatState.Stop;
+
+    public InputPad()
+    {
+        IsEnable = true;
+    }
+
     internal class Data
     {
         //全プラットフォーム共通ボタン定義
@@ -142,6 +165,209 @@ public class InputPad
         now.R2 = 0.0f;
         now.L3 = false;
         now.R3 = false;
+    }
+
+    public bool IsTrigger(InputType.Button button)
+    {
+        if (!IsEnable) { return false; }
+        bool ret = false;
+        switch (button)
+        {
+            case InputType.Button.Left:
+                ret = now.ButtonLeft && prev.ButtonLeft;
+                break;
+            case InputType.Button.Up:
+                ret = now.ButtonUp && prev.ButtonUp;
+                break;
+            case InputType.Button.Right:
+                ret = now.ButtonRight && prev.ButtonRight;
+                break;
+            case InputType.Button.Down:
+                ret = now.ButtonDown && prev.ButtonDown;
+                break;
+            case InputType.Button.KeyLeft:
+                ret = now.KeyLeft && prev.KeyLeft;
+                break;
+            case InputType.Button.KeyUp:
+                ret = now.KeyUp && prev.KeyUp;
+                break;
+            case InputType.Button.KeyRight:
+                ret = now.KeyRight && prev.KeyRight;
+                break;
+            case InputType.Button.KeyDown:
+                ret = now.KeyDown && prev.KeyDown;
+                break;
+            case InputType.Button.L1:
+                ret = now.L1 && prev.L1;
+                break;
+            case InputType.Button.R1:
+                ret = now.R1 && prev.R1;
+                break;
+            case InputType.Button.L2:
+                ret = now.L2 > _triggerDelta && prev.L2 < _triggerDelta;
+                break;
+            case InputType.Button.R2:
+                ret = now.R2 > _triggerDelta && prev.R2 < _triggerDelta;
+                break;
+            case InputType.Button.L3:
+                ret = now.L3 && prev.L3;
+                break;
+            case InputType.Button.R3:
+                ret = now.R3 && prev.R3;
+                break;
+            case InputType.Button.Num:
+                break;
+            default:
+                break;
+        }
+        return ret;
+    }
+
+    public bool IsPress(InputType.Button button)
+    {
+        if (!IsEnable) { return false; }
+        bool ret = false;
+        switch (button)
+        {
+            case InputType.Button.Left:
+                ret = now.ButtonLeft;
+                break;
+            case InputType.Button.Up:
+                ret = now.ButtonUp;
+                break;
+            case InputType.Button.Right:
+                ret = now.ButtonRight;
+                break;
+            case InputType.Button.Down:
+                ret = now.ButtonDown;
+                break;
+            case InputType.Button.KeyLeft:
+                ret = now.KeyLeft;
+                break;
+            case InputType.Button.KeyUp:
+                ret = now.KeyUp;
+                break;
+            case InputType.Button.KeyRight:
+                ret = now.KeyRight;
+                break;
+            case InputType.Button.KeyDown:
+                ret = now.KeyDown;
+                break;
+            case InputType.Button.L1:
+                ret = now.L1;
+                break;
+            case InputType.Button.R1:
+                ret = now.R1;
+                break;
+            case InputType.Button.L2:
+                ret = now.L2 > _triggerDelta;
+                break;
+            case InputType.Button.R2:
+                ret = now.R2 > _triggerDelta;
+                break;
+            case InputType.Button.L3:
+                ret = now.L3;
+                break;
+            case InputType.Button.R3:
+                ret = now.R3;
+                break;
+            case InputType.Button.Num:
+                break;
+            default:
+                break;
+        }
+        return ret;
+    }
+
+    public bool IsRepeat(InputType.Button button)
+    {
+        if (!IsEnable) { return false; }
+        bool ret = false;
+        if (IsPress(button))
+        {
+            switch (_repeatState)
+            {
+                case RepeatState.Stop:
+                    _repeatState = RepeatState.Start;
+                    _repeatWait = RepeatStartWait;
+                    ret = true;
+                    break;
+                case RepeatState.Start:
+                    _repeatWait -= Time.deltaTime;
+                    if (_repeatWait < 0.0f)
+                    {
+                        _repeatState = RepeatState.Repeat;
+                        _repeatWait = RepeatingWait;
+                        ret = true;
+                    }
+                    break;
+                case RepeatState.Repeat:
+                    _repeatWait -= Time.deltaTime;
+                    if (_repeatWait < 0.0f)
+                    {
+                        _repeatWait = RepeatingWait;
+                        ret = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            _repeatState = RepeatState.Stop;
+        }
+        return ret;
+    }
+
+    public float GetAnalog(InputType.Analog analog)
+    {
+        if (!IsEnable) { return 0.0f; }
+        float ret = 0.0f;
+        switch (analog)
+        {
+            case InputType.Analog.HorizontalLeft:
+                ret = now.HorizontalLeft;
+                break;
+            case InputType.Analog.VerticalLeft:
+                ret = now.VerticalLeft;
+                break;
+            case InputType.Analog.HorizontalRight:
+                ret = now.HorizontalRight;
+                break;
+            case InputType.Analog.VerticalRight:
+                ret = now.VerticalRight;
+                break;
+            case InputType.Analog.L2:
+                ret = now.L2;
+                break;
+            case InputType.Analog.R2:
+                ret = now.R2;
+                break;
+            default:
+                break;
+        }
+        return ret;
+    }
+
+    public Vector2 GetThumbStick(InputType.ThumbStick thumbStick)
+    {
+        if (!IsEnable) { return Vector2.zero; }
+        Vector2 ret = Vector2.zero;
+        switch (thumbStick)
+        {
+            case InputType.ThumbStick.Left:
+                ret.x = now.HorizontalLeft;
+                ret.y = now.VerticalLeft;
+                break;
+            case InputType.ThumbStick.Right:
+                ret.x = now.HorizontalRight;
+                ret.y = now.VerticalRight;
+                break;
+            default:
+                break;
+        }
+        return ret;
     }
 
     public void DebugPrint()
