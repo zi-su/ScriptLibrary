@@ -27,7 +27,7 @@ public class CommonButtonHandler : ButtonHandlerBase
 
     public override void Click()
     {
-        OnClick();
+        OnClick?.Invoke();
     }
     public override void Disable()
     {

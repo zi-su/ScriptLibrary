@@ -31,8 +31,11 @@ public class InputManager : SingletonMonobehaviour<InputManager>
     public InputPad CreateInputPad()
     {
         InputPad pad = new InputPad();
-        var prev = _inputPadList[_inputPadList.Count - 1];
-        prev.IsEnable = false;
+        if(_inputPadList.Count > 1)
+        {
+            var prev = _inputPadList[_inputPadList.Count - 1];
+            prev.IsEnable = false;
+        }
         _inputPadList.Add(pad);
         return pad;
     }
@@ -52,7 +55,7 @@ public class InputManager : SingletonMonobehaviour<InputManager>
     public void Update()
     {
         //InputPadの現在状態をprevに保存
-        foreach (var item in _inputPadStack)
+        foreach (var item in _inputPadList)
         {
             //InputPadの現在状態をprevに保存
             item.Backup();
