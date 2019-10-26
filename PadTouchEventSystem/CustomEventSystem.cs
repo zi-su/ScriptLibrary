@@ -2,24 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-public class CustomEventSystem : MonoBehaviour
+using UnityEngine.UI;
+public class CustomEventSystem : SingletonMonobehaviour<CustomEventSystem>
 {
     static EventSystem _current;
     static GameObject _selectedGameObject;
 
-    static public GameObject CurrentSelected
+    public enum Dir
+    {
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN,
+    }
+
+    public GameObject CurrentSelected
     {
         get { return _selectedGameObject; }
         set { _selectedGameObject = value; }
     }
 
-    static public EventSystem CurrentEventSystem
+    public EventSystem current
     {
         get {
-            if(_current == null)
-            {
-                _current = EventSystem.current;
-            }
             return _current;
         }
     }
@@ -27,11 +32,47 @@ public class CustomEventSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DontDestroyOnLoad(gameObject);
-        _current = EventSystem.current;
-        if(_current == null)
+        _current = GetComponent<EventSystem>();
+        gameObject.AddComponent<StandaloneInputModule>();
+    }
+
+    public void Enter(GameObject go)
+    {
+        ExecuteEvents.Execute<IPointerEnterHandler>(go, new PointerEventData(_current), ExecuteEvents.pointerEnterHandler);
+    }
+
+    public void Select(Dir dir)
+    {
+        if(CurrentSelected == null) { return; }
+
+        Find(CurrentSelected, dir);
+    }
+
+    void Find(GameObject go, Dir dir)
+    {
+        var select = go.GetComponent<Selectable>();
+        if (select == null) { return; }
+        Selectable find = null;
+        switch (dir)
         {
-            _current = gameObject.AddComponent<EventSystem>();
+            case Dir.LEFT:
+                find = select.FindSelectableOnLeft();
+                break;
+            case Dir.RIGHT:
+                find = select.FindSelectableOnRight();
+                break;
+            case Dir.UP:
+                find = select.FindSelectableOnUp();
+                break;
+            case Dir.DOWN:
+                find = select.FindSelectableOnDown();
+                break;
+            default:
+                break;
+        }
+        if (find != null)
+        {
+            Enter(find.gameObject);
         }
     }
 }
