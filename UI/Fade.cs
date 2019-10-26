@@ -13,6 +13,10 @@ public class Fade : SingletonMonobehaviour<Fade>
     Color _fromColor;
     System.Action _action;
 
+    /// <summary>
+    /// Canvas描画順序
+    /// </summary>
+    readonly int sortingOrder = 999;
     public enum Mode
     {
         Idle,
@@ -35,7 +39,7 @@ public class Fade : SingletonMonobehaviour<Fade>
         //Canvasコンポーネント
         _canvas = gameObject.AddComponent<Canvas>();
         _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        _canvas.sortingOrder = 999;
+        _canvas.sortingOrder = sortingOrder;
         //CanvasScaler
         var scaler = gameObject.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -110,7 +114,6 @@ public class Fade : SingletonMonobehaviour<Fade>
             case Mode.In:
                 _fadeImage.color = Color.Lerp(_toColor, _fromColor, _elaps / _time);
                 _elaps -= Time.deltaTime;
-                Debug.Log(_fadeImage.color);
                 if(_elaps < 0.0f)
                 {
                     _fadeImage.color = _toColor;
