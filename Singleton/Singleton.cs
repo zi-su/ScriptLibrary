@@ -2,20 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Singleton<T> where T : Component
+public class Singleton<T> where T : class, new()
 {
-    static T _instance = null;
+    static readonly T _instance = new T();
     static public T Instance()
     {
-        if (_instance == null)
-        {
-            _instance = Object.FindObjectOfType<T>();
-            if (_instance == null)
-            {
-                var go = new GameObject();
-                _instance = go.AddComponent<T>();
-            }
-        }
         return _instance;
     }
 }
