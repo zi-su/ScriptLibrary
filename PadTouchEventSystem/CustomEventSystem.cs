@@ -41,6 +41,10 @@ public class CustomEventSystem : SingletonMonobehaviour<CustomEventSystem>
         ExecuteEvents.Execute<IPointerEnterHandler>(go, new PointerEventData(_current), ExecuteEvents.pointerEnterHandler);
     }
 
+    public void Click()
+    {
+        ExecuteEvents.Execute<IPointerClickHandler>(CurrentSelected, new PointerEventData(_current), ExecuteEvents.pointerClickHandler);
+    }
     public void Select(Dir dir)
     {
         if(CurrentSelected == null) { return; }

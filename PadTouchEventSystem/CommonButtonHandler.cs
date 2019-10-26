@@ -2,11 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 public class CommonButtonHandler : ButtonHandlerBase
 {
     [SerializeField]
     Image _selectImage = null;
+    public delegate void onClick();
+    
+    public onClick OnClick
+    {
+        get;set;
+    }
 
     public override void Enter()
     {
@@ -20,7 +27,7 @@ public class CommonButtonHandler : ButtonHandlerBase
 
     public override void Click()
     {
-        
+        OnClick();
     }
     public override void Disable()
     {
