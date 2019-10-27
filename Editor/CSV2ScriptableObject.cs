@@ -6,6 +6,7 @@ using System.IO;
 public class CSV2ScriptableObject : AssetPostprocessor
 {
     string csvPath = "Assets/Data/GameData";
+
     void OnPreprocessAsset()
     {
         //インポートアセットパスをチェック
