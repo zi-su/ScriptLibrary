@@ -174,34 +174,34 @@ public class InputPad
         switch (button)
         {
             case InputType.Button.Left:
-                ret = now.ButtonLeft && prev.ButtonLeft;
+                ret = now.ButtonLeft && !prev.ButtonLeft;
                 break;
             case InputType.Button.Up:
-                ret = now.ButtonUp && prev.ButtonUp;
+                ret = now.ButtonUp && !prev.ButtonUp;
                 break;
             case InputType.Button.Right:
-                ret = now.ButtonRight && prev.ButtonRight;
+                ret = now.ButtonRight && !prev.ButtonRight;
                 break;
             case InputType.Button.Down:
-                ret = now.ButtonDown && prev.ButtonDown;
+                ret = now.ButtonDown && !prev.ButtonDown;
                 break;
             case InputType.Button.KeyLeft:
-                ret = now.KeyLeft && prev.KeyLeft;
+                ret = now.KeyLeft && !prev.KeyLeft;
                 break;
             case InputType.Button.KeyUp:
-                ret = now.KeyUp && prev.KeyUp;
+                ret = now.KeyUp && !prev.KeyUp;
                 break;
             case InputType.Button.KeyRight:
-                ret = now.KeyRight && prev.KeyRight;
+                ret = now.KeyRight && !prev.KeyRight;
                 break;
             case InputType.Button.KeyDown:
-                ret = now.KeyDown && prev.KeyDown;
+                ret = now.KeyDown && !prev.KeyDown;
                 break;
             case InputType.Button.L1:
-                ret = now.L1 && prev.L1;
+                ret = now.L1 && !prev.L1;
                 break;
             case InputType.Button.R1:
-                ret = now.R1 && prev.R1;
+                ret = now.R1 && !prev.R1;
                 break;
             case InputType.Button.L2:
                 ret = now.L2 > _triggerDelta && prev.L2 < _triggerDelta;
@@ -210,10 +210,10 @@ public class InputPad
                 ret = now.R2 > _triggerDelta && prev.R2 < _triggerDelta;
                 break;
             case InputType.Button.L3:
-                ret = now.L3 && prev.L3;
+                ret = now.L3 && !prev.L3;
                 break;
             case InputType.Button.R3:
-                ret = now.R3 && prev.R3;
+                ret = now.R3 && !prev.R3;
                 break;
             case InputType.Button.Num:
                 break;
