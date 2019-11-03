@@ -10,7 +10,7 @@ public class DialogYesNo : MonoBehaviour
     [SerializeField]
     ButtonBase[] buttons;
     int index;
-
+    float wait = 1.0f;
     public void SetAction(UnityAction cancelAction, UnityAction submitAction)
     {
         buttons[0].OnClick += cancelAction;
@@ -27,6 +27,9 @@ public class DialogYesNo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        wait -= Time.deltaTime;
+        if(wait > 0.0f) { return; }
+
         if (inputPad.IsTrigger(InputType.Button.KeyLeft) || inputPad.IsTrigger(InputType.Button.KeyRight))
         {
             index++;

@@ -11,6 +11,7 @@ public class Dialog : MonoBehaviour
     ButtonBase button;
     int index;
 
+    float wait = 1.0f;
     public void SetAction(UnityAction submitAction)
     {
         button.OnClick += submitAction;
@@ -26,14 +27,21 @@ public class Dialog : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (inputPad.IsTrigger(InputType.Button.Right))
+        wait -= Time.deltaTime;
+        if(wait > 0.0f) { return; }
+        
         {
-            CustomEventSystem.Instance().Click();
-        }
-        else if (inputPad.IsTrigger(InputType.Button.Down))
-        {
-            button.OnClick?.Invoke();
-            Destroy(gameObject);
+            if (inputPad.IsTrigger(InputType.Button.Right))
+            {
+                CustomEventSystem.Instance().Click();
+                button.OnClick?.Invoke();
+                Destroy(gameObject);
+            }
+            else if (inputPad.IsTrigger(InputType.Button.Down))
+            {
+                button.OnClick?.Invoke();
+                Destroy(gameObject);
+            }
         }
     }
 
