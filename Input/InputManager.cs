@@ -5,8 +5,6 @@ using UnityEngine;
 [DefaultExecutionOrder(-100)]
 public class InputManager : SingletonMonobehaviour<InputManager>
 {
-    
-    Stack<InputPad> _inputPadStack = new Stack<InputPad>();
     List<InputPad> _inputPadList = new List<InputPad>();
     float _triggerDelta = 0.5f;
     float _repeatWait = 0.0f;
@@ -24,7 +22,6 @@ public class InputManager : SingletonMonobehaviour<InputManager>
     protected override void Awake()
     {
         base.Awake();
-        _inputPadStack.Push(new InputPad());
         gameObject.name = "InputManager";
     }
 
@@ -50,6 +47,15 @@ public class InputManager : SingletonMonobehaviour<InputManager>
                 _inputPadList[_inputPadList.Count - 1].IsEnable = true;
             }
         }
+    }
+
+    public InputPad CurrentPad()
+    {
+        if(_inputPadList.Count > 0)
+        {
+            return _inputPadList[_inputPadList.Count - 1];
+        }
+        return null;
     }
 
     public void Update()
@@ -89,7 +95,7 @@ public class InputManager : SingletonMonobehaviour<InputManager>
 
     public void DebugPrint()
     {
-        var peek = _inputPadStack.Peek();
+        var peek = _inputPadList[_inputPadList.Count - 1];
         peek.DebugPrint();
     }
 }

@@ -33,10 +33,10 @@ public class LoadList
         {
             if (!item.IsDone)
             {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public void Release()
