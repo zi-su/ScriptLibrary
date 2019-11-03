@@ -4,24 +4,24 @@ using UnityEngine;
 using UnityEngine.Events;
 public class CollisionEventBase : MonoBehaviour
 {
-    public UnityAction enterAction;
-    public UnityAction stayAction;
-    public UnityAction exitAction;
+    public UnityAction<Collision> enterAction;
+    public UnityAction<Collision> stayAction;
+    public UnityAction<Collision> exitAction;
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log("CollisionEnter");
-        enterAction?.Invoke();
+        enterAction?.Invoke(collision);
     }
 
     private void OnCollisionStay(Collision collision)
     {
         Debug.Log("CollisionStay");
-        stayAction?.Invoke();
+        stayAction?.Invoke(collision);
     }
 
     private void OnCollisionExit(Collision collision)
     {
         Debug.Log("CollisionExit");
-        exitAction?.Invoke();
+        exitAction?.Invoke(collision);
     }
 }

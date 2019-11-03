@@ -4,24 +4,24 @@ using UnityEngine;
 using UnityEngine.Events;
 public class TriggerEventBase : MonoBehaviour
 {
-    public UnityAction enterAction;
-    public UnityAction stayAction;
-    public UnityAction exitAction;
+    public UnityAction<Collider> enterAction;
+    public UnityAction<Collider> stayAction;
+    public UnityAction<Collider> exitAction;
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Enter");
-        enterAction?.Invoke();
+        enterAction?.Invoke(other);
     }
 
     private void OnTriggerStay(Collider other)
     {
         Debug.Log("Stay");
-        stayAction?.Invoke();
+        stayAction?.Invoke(other);
     }
 
     private void OnTriggerExit(Collider other)
     {
         Debug.Log("Leave");
-        exitAction?.Invoke();
+        exitAction?.Invoke(other);
     }
 }
