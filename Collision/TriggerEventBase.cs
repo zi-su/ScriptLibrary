@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-public class HitAreaBase : MonoBehaviour
+public class TriggerEventBase : MonoBehaviour
 {
     public UnityAction enterAction;
     public UnityAction stayAction;

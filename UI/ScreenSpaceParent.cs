@@ -29,6 +29,7 @@ public class ScreenSpaceParent : MonoBehaviour
         Vector3 p = camera.WorldToScreenPoint(parent.localPosition);
         p.x -= Screen.width / 2.0f;
         p.y -= Screen.height / 2.0f;
+        p.z = 0.0f;
         target.localPosition = p;
     }
 }
