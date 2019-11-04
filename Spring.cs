@@ -5,9 +5,9 @@ using UnityEngine;
 public class Spring : MonoBehaviour
 {
     [SerializeField]
-    Transform _targetTranform;
+    Transform _targetTranform = null;
     [SerializeField]
-    float _k;   //ばね定数
+    float _k = 1.0f;   //ばね定数
     [SerializeField]
     float _mass = 1.0f;    //質量
     Transform _thisTransform;

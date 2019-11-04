@@ -17,24 +17,24 @@ public class ScrollController : MonoBehaviour
         Vertical,
     }
     [SerializeField]
-    ScrollRect _scrollRect;
+    ScrollRect _scrollRect = null;
     [SerializeField]
-    Mode _mode;
+    Mode _mode = Mode.Horizontal;
     [SerializeField]
-    float _spaceX;
+    float _spaceX = 0.0f;
     [SerializeField]
-    float _spaceY;
+    float _spaceY = 0.0f;
     [SerializeField]
-    float _marginTop;
+    float _marginTop = 0.0f;
     [SerializeField]
-    float _marginBottom;
+    float _marginBottom = 0.0f;
 
     [SerializeField]
-    GameObject _cellPrefab;
+    GameObject _cellPrefab = null;
     [SerializeField]
-    RectTransform _scrollRectTransform;
+    RectTransform _scrollRectTransform = null;
     [SerializeField]
-    RectTransform _contentRectTransform;
+    RectTransform _contentRectTransform = null;
 
     List<ICellData> _cellDataList = new List<ICellData>();
     LinkedList<GameObject> _cellLinkList = new LinkedList<GameObject>();
@@ -256,7 +256,6 @@ public class ScrollController : MonoBehaviour
     /// </summary>
     void InstantiateCell(int i)
     {
-        float p = 0;
         var cell = Instantiate(_cellPrefab, _contentRectTransform);
         var view = cell.GetComponent<ICellView>();
         view.UpdateView(_cellDataList[i]);
