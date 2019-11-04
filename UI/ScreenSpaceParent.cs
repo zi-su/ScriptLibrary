@@ -5,14 +5,14 @@ using UnityEngine.UI;
 public class ScreenSpaceParent : MonoBehaviour
 {
     [SerializeField]
-    Transform target;
-    Camera camera;
+    Transform target = null;
+    Camera mainCamera = null;
     Transform parent;
     CanvasScaler canvasScaler;
     // Start is called before the first frame update
     void Start()
     {
-        camera = Camera.main;
+        mainCamera = Camera.main;
         parent = transform.parent;
 
         SetScreenSpacePoint();
@@ -26,7 +26,7 @@ public class ScreenSpaceParent : MonoBehaviour
 
     void SetScreenSpacePoint()
     {
-        Vector3 p = camera.WorldToScreenPoint(parent.localPosition);
+        Vector3 p = mainCamera.WorldToScreenPoint(parent.localPosition);
         p.x -= Screen.width / 2.0f;
         p.y -= Screen.height / 2.0f;
         p.z = 0.0f;

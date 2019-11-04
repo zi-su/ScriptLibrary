@@ -6,19 +6,10 @@ using UnityEngine;
 public class InputManager : SingletonMonobehaviour<InputManager>
 {
     List<InputPad> _inputPadList = new List<InputPad>();
-    float _triggerDelta = 0.5f;
-    float _repeatWait = 0.0f;
+    
     const float RepeatStartWait = 1.0f;
     const float RepeatingWait = 0.05f;
     
-    enum RepeatState
-    {
-        Stop,
-        Start,
-        Repeat,
-    }
-    RepeatState _repeatState = RepeatState.Stop;
-
     protected override void Awake()
     {
         base.Awake();

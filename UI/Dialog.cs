@@ -8,7 +8,7 @@ public class Dialog : MonoBehaviour
     InputPad inputPad;
 
     [SerializeField]
-    ButtonBase button;
+    ButtonBase button = null;
     int index;
 
     float wait = 1.0f;

@@ -8,7 +8,7 @@ public class DialogYesNo : MonoBehaviour
     InputPad inputPad;
 
     [SerializeField]
-    ButtonBase[] buttons;
+    ButtonBase[] buttons = null;
     int index;
     float wait = 1.0f;
     public void SetAction(UnityAction cancelAction, UnityAction submitAction)
