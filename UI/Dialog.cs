@@ -11,7 +11,7 @@ public class Dialog : MonoBehaviour
     ButtonBase button = null;
     int index;
 
-    float wait = 1.0f;
+    float wait = 0.1f;
     public void SetAction(UnityAction submitAction)
     {
         button.OnClick += submitAction;
