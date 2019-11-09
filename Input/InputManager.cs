@@ -9,17 +9,24 @@ public class InputManager : SingletonMonobehaviour<InputManager>
     
     const float RepeatStartWait = 1.0f;
     const float RepeatingWait = 0.05f;
-    
+
+    InputPad defaultPad;
     protected override void Awake()
     {
         base.Awake();
         gameObject.name = "InputManager";
+        defaultPad = CreateInputPad();
+    }
+
+    public InputPad DefaultPad()
+    {
+        return defaultPad;
     }
 
     public InputPad CreateInputPad()
     {
         InputPad pad = new InputPad();
-        if(_inputPadList.Count > 1)
+        if(_inputPadList.Count > 0)
         {
             var prev = _inputPadList[_inputPadList.Count - 1];
             prev.IsEnable = false;
