@@ -176,22 +176,31 @@ public class MakeScriptableObjectClass
     {
         var t = lines[0].Split(',');
         sw.WriteLine("public override void Convert(string[] lines){");
-        for(int i = 2; i < lines.Length; i++)
+
+        sw.WriteLine("data.Clear();");
+        sw.WriteLine("var t = lines[0].Split(',');");
+        sw.WriteLine("for(int i = 2; i < lines.Length; i++)");
+        sw.WriteLine("{");
+        sw.WriteLine("var v = lines[i].Split(',');");
+
+        string s = "data.Add(new Data(";
+        for(int i = 2; i < t.Length; i++)
         {
-            var s = lines[i].Split(',');
-            sw.Write("data.Add(new Data(");
-            for (int j = 2; j < s.Length; j++) {
-                var v = s[j];
-                if(t[j] == "string")
-                {
-                    v = "\"" + v + "\"";
-                }
-                sw.Write($"{v}");
-                if (j != s.Length - 1) sw.Write(", ");
+            if(t[i] == "int")
+            {
+                s += "int.Parse(" + $"v[{i}])";
             }
-            sw.WriteLine("));");
-            
+            else
+            {
+                s += $"v[{i}]";
+            }
+            if (i != t.Length - 1) s += ",";
         }
+        s += "));";
+
+        sw.WriteLine(s);
+        sw.WriteLine("}");
+
         sw.WriteLine("}");
     }
 }
