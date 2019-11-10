@@ -5,7 +5,7 @@ using UnityEditor;
 using System.IO;
 using System.Text;
 
-public class MakeScriptableObjectClass
+public class MakeScriptableObjectClass : AssetPostprocessor
 {
     static string datapath = "Assets/Data/GameData/";
     static string sourcePath = "Assets/Script/ScriptableObject";
@@ -15,6 +15,14 @@ public class MakeScriptableObjectClass
         "using UnityEngine;" + System.Environment.NewLine +
         "public class {0} : ScriptableBase" + System.Environment.NewLine +
         "{{";
+
+    void OnPreprocessAsset()
+    {
+        //インポートアセットパスをチェック
+        var assetPath = assetImporter.assetPath;
+        CreateDataScriptable(assetPath);
+    }
+
     [MenuItem("Assets/CraeteSourceScriptable")]
     static public void CreateSourceScriptable()
     {
