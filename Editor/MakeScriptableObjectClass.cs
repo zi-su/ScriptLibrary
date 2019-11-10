@@ -118,10 +118,12 @@ public class MakeScriptableObjectClass
 
         //リスト宣言
         sw.WriteLine("[SerializeField]\nList<Data> data = new List<Data>();");
+        //アクセッサ
+        WriteAccessor(sw);
 
         //CSVからのコンバートプログラム
         WriteConvert(sw, lines);
-        //アクセッサ
+        
 
         sw.WriteLine("}");
         sw.Close();
@@ -134,7 +136,7 @@ public class MakeScriptableObjectClass
         for (int i = 2; i < lines.Length; i++)
         {
             var splits = lines[i].Split(',');
-            sw.WriteLine(splits[2] + ",");
+            sw.WriteLine(splits[2] + $" = {splits[1]}" + ",");
         }
         sw.WriteLine("}");
     }
@@ -146,7 +148,7 @@ public class MakeScriptableObjectClass
         for(int i = 2; i < t.Length; i++)
         {
             sw.WriteLine("[SerializeField]");
-            sw.WriteLine($"{t[i]} {v[i]};");
+            sw.WriteLine($"internal {t[i]} {v[i]};");
         }
     }
     static void WriteConstructor(StreamWriter sw, string[] lines)
@@ -178,6 +180,13 @@ public class MakeScriptableObjectClass
 
     }
 
+    static void WriteAccessor(StreamWriter sw)
+    {
+        sw.WriteLine("public Data GetData(ID id){");
+        sw.WriteLine("return data.Find(d=>d.Id == id);");
+        sw.WriteLine("}");
+    }
+
     static void WriteConvert(StreamWriter sw, string[] lines)
     {
         var t = lines[0].Split(',');
@@ -200,6 +209,10 @@ public class MakeScriptableObjectClass
             else if(t[i] == "float")
             {
                 s += "float.Parse(" + $"v[{i}])";
+            }
+            else if(t[i].ToLower() == "bool")
+            {
+                s += "bool.Parse(" + $"v[{i}])";
             }
             else
             {
