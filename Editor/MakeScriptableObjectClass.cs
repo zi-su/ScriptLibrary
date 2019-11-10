@@ -61,6 +61,12 @@ public class MakeScriptableObjectClass
             }
             else
             {
+                if(!File.Exists(sourcePath + $"{filename}.cs"))
+                {
+                    CreateSource(path);
+                    AssetDatabase.Refresh();
+                    return;
+                }
                 var so = ScriptableObject.CreateInstance(filename);
                 AssetDatabase.CreateAsset(so, datapath + $"{filename}.asset");
                 AssetDatabase.Refresh();
@@ -128,7 +134,7 @@ public class MakeScriptableObjectClass
         for (int i = 2; i < lines.Length; i++)
         {
             var splits = lines[i].Split(',');
-            sw.WriteLine(splits[1] + ",");
+            sw.WriteLine(splits[2] + ",");
         }
         sw.WriteLine("}");
     }
@@ -184,11 +190,16 @@ public class MakeScriptableObjectClass
         sw.WriteLine("var v = lines[i].Split(',');");
 
         string s = "data.Add(new Data(";
-        for(int i = 2; i < t.Length; i++)
+        s += "(ID)int.Parse(v[1]),";
+        for(int i = 3; i < t.Length; i++)
         {
             if(t[i] == "int")
             {
                 s += "int.Parse(" + $"v[{i}])";
+            }
+            else if(t[i] == "float")
+            {
+                s += "float.Parse(" + $"v[{i}])";
             }
             else
             {
