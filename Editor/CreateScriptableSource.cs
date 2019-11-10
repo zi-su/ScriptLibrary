@@ -4,111 +4,31 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Text;
-
-public class MakeScriptableObjectClass : AssetPostprocessor
+public class CreateScriptableSource
 {
-    static string datapath = "Assets/Data/GameData/";
-    static string sourcePath = "Assets/Script/ScriptableObject";
-
-    static string templateHeader = "using System.Collections;"+System.Environment.NewLine+
-        "using System.Collections.Generic;" + System.Environment.NewLine +
-        "using UnityEngine;" + System.Environment.NewLine +
-        "public class {0} : ScriptableBase" + System.Environment.NewLine +
-        "{{";
-
-    void OnPreprocessAsset()
-    {
-        //インポートアセットパスをチェック
-        var assetPath = assetImporter.assetPath;
-        CreateDataScriptable(assetPath);
-    }
-
     [MenuItem("Assets/CraeteSourceScriptable")]
-    static public void CreateSourceScriptable()
-    {
-        foreach(var s in Selection.objects)
-        {
-            var path = AssetDatabase.GetAssetPath(s);
-            if (Check(path))
-            {
-                CreateSource(path);
-            }
-        }
-    }
-    [MenuItem("Assets/CreateDataScriptable")]
-    static public void CreateDataScriptable()
+    static public void Create()
     {
         foreach (var s in Selection.objects)
         {
             var path = AssetDatabase.GetAssetPath(s);
-            if (Check(path))
+            if (CSVScriptable.Check(path))
             {
-                //CSVファイル名と同じスクリプタブルオブジェクトを作成
-                var filename = Path.GetFileNameWithoutExtension(path);
-                var so = ScriptableObject.CreateInstance(filename);
-                AssetDatabase.CreateAsset(so, datapath + $"{filename}.asset");
-                AssetDatabase.Refresh();
-                var sb = AssetDatabase.LoadAssetAtPath<ScriptableBase>(datapath + $"{filename}.asset");
-                var lines = File.ReadAllLines(path);
-                sb.Convert(lines);
+                Create(path);
             }
         }
     }
 
-    static public void CreateDataScriptable(string path)
-    {
-        if (Check(path))
-        {
-            //CSVファイル名と同じスクリプタブルオブジェクトを作成
-            var filename = Path.GetFileNameWithoutExtension(path);
-            if(File.Exists(datapath + $"{filename}.asset"))
-            {
-                var sb = AssetDatabase.LoadAssetAtPath<ScriptableBase>(datapath + $"{filename}.asset");
-                var lines = File.ReadAllLines(path);
-                sb.Convert(lines);
-            }
-            else
-            {
-                if(!File.Exists(sourcePath + $"{filename}.cs"))
-                {
-                    CreateSource(path);
-                    AssetDatabase.Refresh();
-                    return;
-                }
-                var so = ScriptableObject.CreateInstance(filename);
-                AssetDatabase.CreateAsset(so, datapath + $"{filename}.asset");
-                AssetDatabase.Refresh();
-                var sb = AssetDatabase.LoadAssetAtPath<ScriptableBase>(datapath + $"{filename}.asset");
-                var lines = File.ReadAllLines(path);
-                sb.Convert(lines);
-            }
-            
-        }
-    }
-    static bool Check(string path)
-    {
-        //指定フォルダー
-        if (!path.Contains(datapath))
-        {
-            return false;
-        }
-        //拡張子がcsv
-        var ext = Path.GetExtension(path);
-        if(ext != ".csv")
-        {
-            return false;
-        }
-        return true;
-    }
+    
 
-    static void CreateSource(string path)
+    static public void Create(string path)
     {
         var filename = Path.GetFileNameWithoutExtension(path);
-        Directory.CreateDirectory(sourcePath);
-        StreamWriter sw = new StreamWriter(Path.Combine(sourcePath,filename) + ".cs", false, Encoding.UTF8);
+        Directory.CreateDirectory(CSVScriptable.sourcePath);
+        StreamWriter sw = new StreamWriter(Path.Combine(CSVScriptable.sourcePath, filename) + ".cs", false, Encoding.UTF8);
 
-        sw.WriteLine(string.Format(templateHeader, filename));
-        
+        sw.WriteLine(string.Format(CSVScriptable.templateHeader, filename));
+
         var lines = File.ReadAllLines(path);
         //enum　ID書き出し
         WriteEnum(sw, lines);
@@ -131,7 +51,7 @@ public class MakeScriptableObjectClass : AssetPostprocessor
 
         //CSVからのコンバートプログラム
         WriteConvert(sw, lines);
-        
+
 
         sw.WriteLine("}");
         sw.Close();
@@ -153,7 +73,7 @@ public class MakeScriptableObjectClass : AssetPostprocessor
     {
         var t = lines[0].Split(',');
         var v = lines[1].Split(',');
-        for(int i = 2; i < t.Length; i++)
+        for (int i = 2; i < t.Length; i++)
         {
             sw.WriteLine("[SerializeField]");
             sw.WriteLine($"internal {t[i]} {v[i]};");
@@ -208,17 +128,17 @@ public class MakeScriptableObjectClass : AssetPostprocessor
 
         string s = "data.Add(new Data(";
         s += "(ID)int.Parse(v[1]),";
-        for(int i = 3; i < t.Length; i++)
+        for (int i = 3; i < t.Length; i++)
         {
-            if(t[i] == "int")
+            if (t[i] == "int")
             {
                 s += "int.Parse(" + $"v[{i}])";
             }
-            else if(t[i] == "float")
+            else if (t[i] == "float")
             {
                 s += "float.Parse(" + $"v[{i}])";
             }
-            else if(t[i].ToLower() == "bool")
+            else if (t[i].ToLower() == "bool")
             {
                 s += "bool.Parse(" + $"v[{i}])";
             }
