@@ -3,34 +3,12 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
-/// <summary>
-/// グループを文字列順に並べるソート
-/// </summary>
-class GroupCompare : Comparer<UnityEditor.AddressableAssets.Settings.AddressableAssetGroup>
-{
-    public override int Compare(UnityEditor.AddressableAssets.Settings.AddressableAssetGroup x, UnityEditor.AddressableAssets.Settings.AddressableAssetGroup y)
-    {
-        int r = string.CompareOrdinal(x.Name, y.Name);
-        if (r > 0)
-        {
-            return 1;
-        }
-        else if (r < 0)
-        {
-            return -1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-}
+
 
 public class AASUtility : UnityEditor.Editor
 {
 
     const string addressableAssetSettings = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
-    const string analyzeRuleData = "Assets/AddressableAssetsData/AnalyzeData/AnalyzeRuleData.asset";
 
     /// <summary>
     /// 任意のアセットをグループに追加
@@ -74,6 +52,40 @@ public class AASUtility : UnityEditor.Editor
         s.groups.Sort(new GroupCompare());
     }
 
+    /// <summary>
+    /// アドレスの重複チェック
+    /// 重複しているとビルドできない
+    /// </summary>
+    [MenuItem("test/checkAddress")]
+    static public void CheckAddress()
+    {
+        var s = GetSettings();
+        List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+        s.GetAllAssets(entries, true);
+        List<string> checkedAddress = new List<string>();
+        foreach (var e in entries)
+        {
+            //チェック済みアドレスはコンテニュー
+            if (checkedAddress.Contains(e.address)) continue;
+
+            //全アセットで重複があるかチェック
+            var ret = entries.FindAll(d => d.address == e.address);
+            //重複があった場合は出力
+            if(ret.Count > 1)
+            {
+                string str = "Address=" + e.address + System.Environment.NewLine;
+                foreach (var r in ret)
+                {
+                    string assetname = System.IO.Path.GetFileName(r.AssetPath);
+                    str += "Group=" + r.parentGroup.Name + "," + "AssetName=" + assetname + System.Environment.NewLine;
+                }
+                Debug.Log(str);
+            }
+            //重複リストに追加
+            checkedAddress.Add(e.address);
+        }
+    }
+
     static UnityEditor.AddressableAssets.Settings.AddressableAssetSettings GetSettings()
     {
         //アドレサブルアセットセッティング取得
@@ -95,8 +107,8 @@ public class AASUtility : UnityEditor.Editor
         var s = GetSettings();
         //スキーマ生成
         List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema> schema = new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>() {
-            UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema.CreateInstance<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>(),
-            UnityEditor.AddressableAssets.Settings.GroupSchemas.ContentUpdateGroupSchema.CreateInstance<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>()
+            UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema.CreateInstance<UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema>(),
+            UnityEditor.AddressableAssets.Settings.GroupSchemas.ContentUpdateGroupSchema.CreateInstance<UnityEditor.AddressableAssets.Settings.GroupSchemas.ContentUpdateGroupSchema>()
         };
         //グループの作成
         var f = s.groups.Find((g) => { return g.name == groupName; });
@@ -166,5 +178,29 @@ public class AASUtility : UnityEditor.Editor
     static public void ExecuteGraph()
     {
         AssetGraphUtility.ExecuteGraph("Assets/AssetGraph/Graph/Stage.asset");
+    }
+}
+
+
+/// <summary>
+/// グループを文字列順に並べるソート
+/// </summary>
+class GroupCompare : Comparer<UnityEditor.AddressableAssets.Settings.AddressableAssetGroup>
+{
+    public override int Compare(UnityEditor.AddressableAssets.Settings.AddressableAssetGroup x, UnityEditor.AddressableAssets.Settings.AddressableAssetGroup y)
+    {
+        int r = string.CompareOrdinal(x.Name, y.Name);
+        if (r > 0)
+        {
+            return 1;
+        }
+        else if (r < 0)
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
