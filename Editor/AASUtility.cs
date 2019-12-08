@@ -1,21 +1,92 @@
-﻿using System.Collections;
+﻿using UnityEngine.AssetGraph;
+using UnityEditor;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 
-using UnityEditor.AddressableAssets;
+/// <summary>
+/// グループを文字列順に並べるソート
+/// </summary>
+class GroupCompare : Comparer<UnityEditor.AddressableAssets.Settings.AddressableAssetGroup>
+{
+    public override int Compare(UnityEditor.AddressableAssets.Settings.AddressableAssetGroup x, UnityEditor.AddressableAssets.Settings.AddressableAssetGroup y)
+    {
+        int r = string.CompareOrdinal(x.Name, y.Name);
+        if (r > 0)
+        {
+            return 1;
+        }
+        else if (r < 0)
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+}
+
 public class AASUtility : UnityEditor.Editor
 {
+
+    const string addressableAssetSettings = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
+
+    /// <summary>
+    /// 任意のアセットをグループに追加
+    /// </summary>
+    /// <param name="assetGuid"></param>
+    /// <param name="groupName"></param>
+    /// <param name="address"></param>
+    static public void AddAssetToGroup(string assetGuid, string groupName, string address = null)
+    {
+        var s = GetSettings();
+        var g = CreateGroup(groupName);
+        var e = s.CreateOrMoveEntry(assetGuid, g);
+        if(address != null)
+        {
+            e.SetAddress(address);
+        }
+    }
+
+    /// <summary>
+    /// 空グループを削除
+    /// </summary>
+    static public void DeleteEmptyGroup()
+    {
+        var s = GetSettings();
+        var groups = s.groups;
+        foreach (var g in groups)
+        {
+            if (g.entries.Count == 0 && !g.IsDefaultGroup())
+            {
+                s.RemoveGroup(g);
+            }   
+        }
+    }
+    
+    /// <summary>
+    /// 文字列順にソートする
+    /// </summary>
+    static public void Sort()
+    {
+        var s = GetSettings();
+        s.groups.Sort(new GroupCompare());
+    }
+
     static UnityEditor.AddressableAssets.Settings.AddressableAssetSettings GetSettings()
     {
         //アドレサブルアセットセッティング取得
         var d = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.AddressableAssets.Settings.AddressableAssetSettings>(
-            "Assets/AddressableAssetsData/AddressableAssetSettings.asset"
+            addressableAssetSettings
             );
         return d;
     }
 
-
+    /// <summary>
+    /// グループを作成
+    /// </summary>
+    /// <param name="groupName"></param>
+    /// <returns></returns>
     static UnityEditor.AddressableAssets.Settings.AddressableAssetGroup CreateGroup(string groupName)
     {
         //アドレサブルアセットセッティング取得
@@ -27,7 +98,7 @@ public class AASUtility : UnityEditor.Editor
         };
         //グループの作成
         var f = s.groups.Find((g) => { return g.name == groupName; });
-        if(f == null)
+        if (f == null)
         {
             return s.CreateGroup(groupName, false, false, true, schema);
         }
@@ -35,12 +106,12 @@ public class AASUtility : UnityEditor.Editor
         return f;
     }
 
-    static void AddAssetToGroup(string assetGuid, string groupName)
-    {
-        var s = GetSettings();
-        var g = CreateGroup(groupName);
-        s.CreateOrMoveEntry(assetGuid, g);
-    }
+    /// <summary>
+    /// アセットにラベルを一括設定
+    /// </summary>
+    /// <param name="assetGuidList"></param>
+    /// <param name="label"></param>
+    /// <param name="flag"></param>
     static void SetLabelToAsset(List<string> assetGuidList, string label, bool flag)
     {
         var s = GetSettings();
@@ -57,12 +128,20 @@ public class AASUtility : UnityEditor.Editor
             }
         }
     }
+
+    /// <summary>
+    /// グループからアセットを削除
+    /// </summary>
+    /// <param name="assetGuid"></param>
     static void RemoveAssetFromGroup(string assetGuid)
     {
         var s = GetSettings();
         s.RemoveAssetEntry(assetGuid);
     }
 
+    /// <summary>
+    /// アドレサブルをビルド
+    /// </summary>
     static void BuildPlayerContent()
     {
         var d = GetSettings();
@@ -78,5 +157,12 @@ public class AASUtility : UnityEditor.Editor
         ////List<string> assetGuidList = new List<string>() { matguid };
         ////SetLabelToAsset(assetGuidList, "mat", true);
         //CreateGroup("CreatedGroup");
+    }
+
+
+    [MenuItem("test/ExecuteGraph")]
+    static public void ExecuteGraph()
+    {
+        AssetGraphUtility.ExecuteGraph("Assets/AssetGraph/Graph/Stage.asset");
     }
 }
