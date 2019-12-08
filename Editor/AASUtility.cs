@@ -2,7 +2,7 @@
 using UnityEditor;
 using System.Collections.Generic;
 using UnityEditor.AddressableAssets.Settings;
-
+using UnityEditor.AddressableAssets;
 /// <summary>
 /// グループを文字列順に並べるソート
 /// </summary>
@@ -30,6 +30,7 @@ public class AASUtility : UnityEditor.Editor
 {
 
     const string addressableAssetSettings = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
+    const string analyzeRuleData = "Assets/AddressableAssetsData/AnalyzeData/AnalyzeRuleData.asset";
 
     /// <summary>
     /// 任意のアセットをグループに追加
@@ -63,7 +64,7 @@ public class AASUtility : UnityEditor.Editor
             }   
         }
     }
-    
+
     /// <summary>
     /// 文字列順にソートする
     /// </summary>
@@ -82,6 +83,7 @@ public class AASUtility : UnityEditor.Editor
         return d;
     }
 
+    
     /// <summary>
     /// グループを作成
     /// </summary>
@@ -93,8 +95,8 @@ public class AASUtility : UnityEditor.Editor
         var s = GetSettings();
         //スキーマ生成
         List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema> schema = new List<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>() {
-            new UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema(),
-            new UnityEditor.AddressableAssets.Settings.GroupSchemas.ContentUpdateGroupSchema()
+            UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema.CreateInstance<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>(),
+            UnityEditor.AddressableAssets.Settings.GroupSchemas.ContentUpdateGroupSchema.CreateInstance<UnityEditor.AddressableAssets.Settings.AddressableAssetGroupSchema>()
         };
         //グループの作成
         var f = s.groups.Find((g) => { return g.name == groupName; });
