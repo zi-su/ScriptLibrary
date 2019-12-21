@@ -3,12 +3,49 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
-
+using System.Linq;
 
 public class AASUtility : UnityEditor.Editor
 {
-
+    static public string assetRoot = "Assets" + System.IO.Path.DirectorySeparatorChar + "Data" + System.IO.Path.DirectorySeparatorChar;
     const string addressableAssetSettings = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
+    const string menuName = "AASUtility";
+
+    static string editorDir = "Editor";
+    const string dataRoot = "Assets/Data/";
+    /// <summary>
+    /// データディレクトリのルートから全グループを作成する
+    /// </summary>
+    [MenuItem(menuName+"/CreateAssetsDataGroup")]
+    static public void CreateGroup()
+    {
+        var assetPaths = AssetDatabase.GetAllAssetPaths().ToList();
+        var dataPath = assetPaths.FindAll(p => p.Contains(dataRoot));
+        foreach (var asset in dataPath)
+        {
+            AddGroup(asset);
+        }
+        Sort();
+    }
+
+    static public bool AddGroup(string asset)
+    {
+        var dir = System.IO.Path.GetDirectoryName(asset);
+
+        //グループに含めていいかのチェック
+        //ディレクトリとエディターディレクトリのアセットは含めない
+        if (System.IO.Directory.Exists(asset)) return false;
+        if (dir.Contains(editorDir)) return false;
+
+        //アドレス名を求める計算
+        var filename = System.IO.Path.GetFileName(asset);
+        dir = dir.Replace(assetRoot, "");
+        string group = dir.Replace(System.IO.Path.DirectorySeparatorChar, '_');
+        var address = group + "_" + System.IO.Path.GetFileNameWithoutExtension(asset);
+
+        AASUtility.AddAssetToGroup(AssetDatabase.AssetPathToGUID(asset), group, address);
+        return true;
+    }
 
     /// <summary>
     /// 任意のアセットをグループに追加
@@ -23,13 +60,33 @@ public class AASUtility : UnityEditor.Editor
         var e = s.CreateOrMoveEntry(assetGuid, g);
         if(address != null)
         {
-            e.SetAddress(address);
+            List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
+            s.GetAllAssets(entries, true);
+            if (CheckAddress(entries, address))
+            {
+                e.SetAddress(address);
+            }
+            else
+            {
+                Debug.LogAssertion("Duplicate Address");
+            }
         }
+    }
+
+    /// <summary>
+    /// 文字列順にソートする
+    /// </summary>
+    [MenuItem(menuName + "/Sort")]
+    static public void Sort()
+    {
+        var s = GetSettings();
+        s.groups.Sort(new GroupCompare());
     }
 
     /// <summary>
     /// 空グループを削除
     /// </summary>
+    [MenuItem(menuName+"/Remove/EmptyGroup")]
     static public void DeleteEmptyGroup()
     {
         var s = GetSettings();
@@ -44,20 +101,26 @@ public class AASUtility : UnityEditor.Editor
     }
 
     /// <summary>
-    /// 文字列順にソートする
+    /// 全グループを削除
     /// </summary>
-    static public void Sort()
+    [MenuItem(menuName+"/Remove/AllGroup")]
+    static public void RemoveAllGroup()
     {
         var s = GetSettings();
-        s.groups.Sort(new GroupCompare());
-    }
+        var groups = s.groups;
+        for(int i = groups.Count - 1; i >= 0; i--)
+        {
+            if (groups[i].IsDefaultGroup()) continue;
+            s.RemoveGroup(groups[i]);
+        }
 
+    }
     /// <summary>
-    /// アドレスの重複チェック
+    /// 全アドレスの重複チェック
     /// 重複しているとビルドできない
     /// </summary>
-    [MenuItem("test/checkAddress")]
-    static public void CheckAddress()
+    [MenuItem(menuName + "/CheckAllAddress")]
+    static public void CheckAllAddress()
     {
         var s = GetSettings();
         List<AddressableAssetEntry> entries = new List<AddressableAssetEntry>();
@@ -69,23 +132,57 @@ public class AASUtility : UnityEditor.Editor
             if (checkedAddress.Contains(e.address)) continue;
 
             //全アセットで重複があるかチェック
-            var ret = entries.FindAll(d => d.address == e.address);
-            //重複があった場合は出力
-            if(ret.Count > 1)
+            bool ret = CheckAddress(entries, e.address);
+            if (!ret)
             {
-                string str = "Address=" + e.address + System.Environment.NewLine;
-                foreach (var r in ret)
-                {
-                    string assetname = System.IO.Path.GetFileName(r.AssetPath);
-                    str += "Group=" + r.parentGroup.Name + "," + "AssetName=" + assetname + System.Environment.NewLine;
-                }
-                Debug.Log(str);
+                checkedAddress.Add(e.address);
             }
-            //重複リストに追加
-            checkedAddress.Add(e.address);
         }
     }
 
+    /// <summary>
+    /// アドレサブルをビルド
+    /// </summary>
+    [MenuItem(menuName + "/Build")]
+    static public void Build()
+    {
+        AddressableAssetSettings.BuildPlayerContent();
+    }
+
+    /// <summary>
+    /// ビルドをクリーン
+    /// </summary>
+    [MenuItem(menuName + "/CleanBuild")]
+    static public void Clean()
+    {
+        AddressableAssetSettings.CleanPlayerContent();
+    }
+
+    /// <summary>
+    /// 重複アドレスチェック
+    /// </summary>
+    /// <param name="entries"></param>
+    /// <param name="address"></param>
+    /// <returns>重複なしtrue、ありfalse</returns>
+    static public bool CheckAddress(List<AddressableAssetEntry> entries, string address)
+    {
+        var s = GetSettings();
+        var duplicateEntries = entries.FindAll(e=>e.address == address);
+        if(duplicateEntries.Count > 1)
+        {
+            string str = "Address=" + address + System.Environment.NewLine;
+            foreach (var e in duplicateEntries)
+            {
+                string assetname = System.IO.Path.GetFileName(e.AssetPath);
+                str += "Group=" + e.parentGroup.Name + "," + "AssetName=" + assetname + System.Environment.NewLine;
+            }
+            Debug.LogAssertion("DuplicateAddress" + System.Environment.NewLine + str);
+            return false;
+        }
+        return true;
+    }
+
+    
     static UnityEditor.AddressableAssets.Settings.AddressableAssetSettings GetSettings()
     {
         //アドレサブルアセットセッティング取得
@@ -123,9 +220,9 @@ public class AASUtility : UnityEditor.Editor
     /// <summary>
     /// アセットにラベルを一括設定
     /// </summary>
-    /// <param name="assetGuidList"></param>
-    /// <param name="label"></param>
-    /// <param name="flag"></param>
+    /// <param name="assetGuidList">対象アセットのGUIDリスト</param>
+    /// <param name="label">ラベル名</param>
+    /// <param name="flag">ラベル有効、無効のフラグ</param>
     static void SetLabelToAsset(List<string> assetGuidList, string label, bool flag)
     {
         var s = GetSettings();
@@ -152,27 +249,7 @@ public class AASUtility : UnityEditor.Editor
         var s = GetSettings();
         s.RemoveAssetEntry(assetGuid);
     }
-
-    /// <summary>
-    /// アドレサブルをビルド
-    /// </summary>
-    static void BuildPlayerContent()
-    {
-        var d = GetSettings();
-        UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent();
-    }
-    [UnityEditor.MenuItem("test/run")]
-    static public void Test()
-    {
-        var d = GetSettings();
-
-        var matguid = UnityEditor.AssetDatabase.AssetPathToGUID("Assets/Data/hogeMat.mat");
-        AddAssetToGroup(matguid, "CreatedGroup");
-        ////List<string> assetGuidList = new List<string>() { matguid };
-        ////SetLabelToAsset(assetGuidList, "mat", true);
-        //CreateGroup("CreatedGroup");
-    }
-
+    
 
     [MenuItem("test/ExecuteGraph")]
     static public void ExecuteGraph()
